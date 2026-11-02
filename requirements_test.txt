@@ -1,0 +1,4 @@
+# Pins Home Assistant 2026.10.4, pytest 9.0.3 and pytest-asyncio 1.4.0.
+# Requires Python >=3.14.2. Runtime dependencies are provided by Home Assistant.
+pytest-homeassistant-custom-component==0.13.375
+ruff==0.17.3

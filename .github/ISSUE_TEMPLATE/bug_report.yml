@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible problem with the integration.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach tokens, onboarding codes, raw household captures, or screenshots containing private information. Review exported diagnostics before posting. Security reports belong in the process described in SECURITY.md.
+  - type: input
+    id: versions
+    attributes:
+      label: Integration and Home Assistant versions
+      placeholder: "0.1.0b1 / 2026.10.4"
+    validations:
+      required: true
+  - type: input
+    id: studio
+    attributes:
+      label: Aqara Studio and hub firmware versions
+      description: Use the actual versions displayed by your system; no device IDs.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps, expected result, and actual result
+      description: Include whether WebSocket push or REST fallback was in use and whether polarity calibration is complete.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted diagnostics and relevant logs
+      description: Remove any secrets and personal information. Never paste the config entry or .storage files.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I reviewed attachments for tokens, private addresses, names, and device identifiers.
+          required: true
+        - label: I kept the known-working integration until live acceptance was complete.

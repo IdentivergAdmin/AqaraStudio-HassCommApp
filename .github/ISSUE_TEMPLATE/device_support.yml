@@ -1,0 +1,24 @@
+name: Device capability support
+description: Propose a mapping backed by a sanitized definition and observed behavior.
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Device model and software versions
+      description: Model codes are useful. Personal device IDs are not needed.
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Exact function, trait, access flags, and vendor reference
+      description: Include a link to Aqara's specification and sanitized metadata if available.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Physically observed values or live events
+      description: Distinguish a cached trait from a newly received live event. Do not include tokens, personal names, addresses, or device identifiers.
+    validations:
+      required: true

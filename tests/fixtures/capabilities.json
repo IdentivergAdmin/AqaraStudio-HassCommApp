@@ -1,0 +1,864 @@
+{
+  "provenance": "Synthetic fixtures shaped from Aqara public OpenAPI. Contact/leak values are calibration test inputs, not hardware captures or vendor polarity evidence.",
+  "inventory": [
+    {
+      "deviceId": "synthetic-contact",
+      "deviceName": "Synthetic Contact",
+      "deviceTypesList": [
+        "ContactSensor"
+      ],
+      "gatewayId": "synthetic-studio",
+      "state": true,
+      "createTime": 0
+    },
+    {
+      "deviceId": "synthetic-leak",
+      "deviceName": "Synthetic Leak",
+      "deviceTypesList": [
+        "WaterLeakSensor"
+      ],
+      "gatewayId": "synthetic-studio",
+      "state": true,
+      "createTime": 0
+    },
+    {
+      "deviceId": "synthetic-environment",
+      "deviceName": "Synthetic Environment",
+      "deviceTypesList": [
+        "TemperatureSensor"
+      ],
+      "gatewayId": "synthetic-studio",
+      "state": true,
+      "createTime": 0
+    },
+    {
+      "deviceId": "synthetic-button",
+      "deviceName": "Synthetic Button",
+      "deviceTypesList": [
+        "Button"
+      ],
+      "gatewayId": "synthetic-studio",
+      "state": true,
+      "createTime": 0
+    },
+    {
+      "deviceId": "synthetic-light",
+      "deviceName": "Synthetic Light",
+      "deviceTypesList": [
+        "Light"
+      ],
+      "gatewayId": "synthetic-studio",
+      "state": true,
+      "createTime": 0
+    },
+    {
+      "deviceId": "synthetic-switch",
+      "deviceName": "Synthetic Switch",
+      "deviceTypesList": [
+        "Switch"
+      ],
+      "gatewayId": "synthetic-studio",
+      "state": true,
+      "createTime": 0
+    },
+    {
+      "deviceId": "synthetic-unknown",
+      "deviceName": "Synthetic Unknown",
+      "deviceTypesList": [
+        "Unknown"
+      ],
+      "gatewayId": "synthetic-studio",
+      "state": true,
+      "createTime": 0
+    }
+  ],
+  "definitions": [
+    {
+      "deviceId": "synthetic-contact",
+      "name": "Synthetic Contact",
+      "gatewayId": "synthetic-studio",
+      "deviceTypesList": [
+        "ContactSensor"
+      ],
+      "endpoints": [
+        {
+          "endpointId": 0,
+          "endpointName": "Endpoint 0",
+          "deviceType": "Public",
+          "functions": [
+            {
+              "functionCode": "BasicInformation",
+              "traits": [
+                {
+                  "traitCode": "Reachable",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": true,
+                  "time": 0
+                },
+                {
+                  "traitCode": "VendorName",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "Aqara",
+                  "time": 0
+                },
+                {
+                  "traitCode": "ModelValue",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "synthetic.model",
+                  "time": 0
+                },
+                {
+                  "traitCode": "FirmwareRevisionString",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "example-1.0",
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        },
+        {
+          "endpointId": 1,
+          "endpointName": "Endpoint 1",
+          "deviceType": "ContactSensor",
+          "functions": [
+            {
+              "functionCode": "Contact",
+              "traits": [
+                {
+                  "traitCode": "ContactSensorState",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": false,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            },
+            {
+              "functionCode": "PowerSource",
+              "traits": [
+                {
+                  "traitCode": "BatPercentRemaining",
+                  "parameter": {
+                    "type": "Float",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": "%",
+                    "min": 0,
+                    "max": 100
+                  },
+                  "value": 87.5,
+                  "time": 0
+                },
+                {
+                  "traitCode": "CurrentVoltage",
+                  "parameter": {
+                    "type": "Float",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": "V",
+                    "min": 0,
+                    "max": 500
+                  },
+                  "value": 3.01,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "deviceId": "synthetic-leak",
+      "name": "Synthetic Leak",
+      "gatewayId": "synthetic-studio",
+      "deviceTypesList": [
+        "WaterLeakSensor"
+      ],
+      "endpoints": [
+        {
+          "endpointId": 0,
+          "endpointName": "Endpoint 0",
+          "deviceType": "Public",
+          "functions": [
+            {
+              "functionCode": "BasicInformation",
+              "traits": [
+                {
+                  "traitCode": "Reachable",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": true,
+                  "time": 0
+                },
+                {
+                  "traitCode": "VendorName",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "Aqara",
+                  "time": 0
+                },
+                {
+                  "traitCode": "ModelValue",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "synthetic.model",
+                  "time": 0
+                },
+                {
+                  "traitCode": "FirmwareRevisionString",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "example-1.0",
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        },
+        {
+          "endpointId": 1,
+          "endpointName": "Endpoint 1",
+          "deviceType": "WaterLeakSensor",
+          "functions": [
+            {
+              "functionCode": "WaterLeak",
+              "traits": [
+                {
+                  "traitCode": "LeakState",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": false,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "deviceId": "synthetic-environment",
+      "name": "Synthetic Environment",
+      "gatewayId": "synthetic-studio",
+      "deviceTypesList": [
+        "TemperatureSensor"
+      ],
+      "endpoints": [
+        {
+          "endpointId": 0,
+          "endpointName": "Endpoint 0",
+          "deviceType": "Public",
+          "functions": [
+            {
+              "functionCode": "BasicInformation",
+              "traits": [
+                {
+                  "traitCode": "Reachable",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": true,
+                  "time": 0
+                },
+                {
+                  "traitCode": "VendorName",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "Aqara",
+                  "time": 0
+                },
+                {
+                  "traitCode": "ModelValue",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "synthetic.model",
+                  "time": 0
+                },
+                {
+                  "traitCode": "FirmwareRevisionString",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "example-1.0",
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        },
+        {
+          "endpointId": 1,
+          "endpointName": "Endpoint 1",
+          "deviceType": "TemperatureSensor",
+          "functions": [
+            {
+              "functionCode": "Temperature",
+              "traits": [
+                {
+                  "traitCode": "CurrentTemperature",
+                  "parameter": {
+                    "type": "Float",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": "\u00b0C",
+                    "min": -50,
+                    "max": 100
+                  },
+                  "value": 22.5,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            },
+            {
+              "functionCode": "RelativeHumidity",
+              "traits": [
+                {
+                  "traitCode": "CurrentHumidity",
+                  "parameter": {
+                    "type": "Float",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": "%",
+                    "min": 0,
+                    "max": 100
+                  },
+                  "value": 43.7,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            },
+            {
+              "functionCode": "Illuminance",
+              "traits": [
+                {
+                  "traitCode": "CurrentIlluminance",
+                  "parameter": {
+                    "type": "Float",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": "lx",
+                    "min": 0,
+                    "max": 100000
+                  },
+                  "value": 55,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "deviceId": "synthetic-button",
+      "name": "Synthetic Button",
+      "gatewayId": "synthetic-studio",
+      "deviceTypesList": [
+        "Button"
+      ],
+      "endpoints": [
+        {
+          "endpointId": 0,
+          "endpointName": "Endpoint 0",
+          "deviceType": "Public",
+          "functions": [
+            {
+              "functionCode": "BasicInformation",
+              "traits": [
+                {
+                  "traitCode": "Reachable",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": true,
+                  "time": 0
+                },
+                {
+                  "traitCode": "VendorName",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "Aqara",
+                  "time": 0
+                },
+                {
+                  "traitCode": "ModelValue",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "synthetic.model",
+                  "time": 0
+                },
+                {
+                  "traitCode": "FirmwareRevisionString",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "example-1.0",
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        },
+        {
+          "endpointId": 1,
+          "endpointName": "Endpoint 1",
+          "deviceType": "Button",
+          "functions": [
+            {
+              "functionCode": "Button",
+              "traits": [
+                {
+                  "traitCode": "ButtonEvent",
+                  "parameter": {
+                    "type": "Enum",
+                    "readable": false,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": "",
+                    "supportedValues": [
+                      {
+                        "key": "SinglePress",
+                        "value": "0"
+                      },
+                      {
+                        "key": "DoublePress",
+                        "value": "1"
+                      },
+                      {
+                        "key": "LongPress",
+                        "value": "2"
+                      },
+                      {
+                        "key": "LongPressRelease",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "value": "SinglePress",
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "deviceId": "synthetic-light",
+      "name": "Synthetic Light",
+      "gatewayId": "synthetic-studio",
+      "deviceTypesList": [
+        "Light"
+      ],
+      "endpoints": [
+        {
+          "endpointId": 0,
+          "endpointName": "Endpoint 0",
+          "deviceType": "Public",
+          "functions": [
+            {
+              "functionCode": "BasicInformation",
+              "traits": [
+                {
+                  "traitCode": "Reachable",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": true,
+                  "time": 0
+                },
+                {
+                  "traitCode": "VendorName",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "Aqara",
+                  "time": 0
+                },
+                {
+                  "traitCode": "ModelValue",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "synthetic.model",
+                  "time": 0
+                },
+                {
+                  "traitCode": "FirmwareRevisionString",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "example-1.0",
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        },
+        {
+          "endpointId": 1,
+          "endpointName": "Endpoint 1",
+          "deviceType": "Light",
+          "functions": [
+            {
+              "functionCode": "Output",
+              "traits": [
+                {
+                  "traitCode": "OnOff",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": true,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": false,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            },
+            {
+              "functionCode": "LevelControl",
+              "traits": [
+                {
+                  "traitCode": "CurrentLevel",
+                  "parameter": {
+                    "type": "Float",
+                    "readable": true,
+                    "writable": true,
+                    "subscribable": true,
+                    "unit": "%",
+                    "min": 1,
+                    "max": 100,
+                    "step": 1
+                  },
+                  "value": 50,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "deviceId": "synthetic-switch",
+      "name": "Synthetic Switch",
+      "gatewayId": "synthetic-studio",
+      "deviceTypesList": [
+        "Switch"
+      ],
+      "endpoints": [
+        {
+          "endpointId": 0,
+          "endpointName": "Endpoint 0",
+          "deviceType": "Public",
+          "functions": [
+            {
+              "functionCode": "BasicInformation",
+              "traits": [
+                {
+                  "traitCode": "Reachable",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": true,
+                  "time": 0
+                },
+                {
+                  "traitCode": "VendorName",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "Aqara",
+                  "time": 0
+                },
+                {
+                  "traitCode": "ModelValue",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "synthetic.model",
+                  "time": 0
+                },
+                {
+                  "traitCode": "FirmwareRevisionString",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "example-1.0",
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        },
+        {
+          "endpointId": 1,
+          "endpointName": "Endpoint 1",
+          "deviceType": "Switch",
+          "functions": [
+            {
+              "functionCode": "Output",
+              "traits": [
+                {
+                  "traitCode": "OnOff",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": true,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": true,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "deviceId": "synthetic-unknown",
+      "name": "Synthetic Unknown",
+      "gatewayId": "synthetic-studio",
+      "deviceTypesList": [
+        "Unknown"
+      ],
+      "endpoints": [
+        {
+          "endpointId": 0,
+          "endpointName": "Endpoint 0",
+          "deviceType": "Public",
+          "functions": [
+            {
+              "functionCode": "BasicInformation",
+              "traits": [
+                {
+                  "traitCode": "Reachable",
+                  "parameter": {
+                    "type": "Bool",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": true,
+                  "time": 0
+                },
+                {
+                  "traitCode": "VendorName",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "Aqara",
+                  "time": 0
+                },
+                {
+                  "traitCode": "ModelValue",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "synthetic.model",
+                  "time": 0
+                },
+                {
+                  "traitCode": "FirmwareRevisionString",
+                  "parameter": {
+                    "type": "String",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": "example-1.0",
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        },
+        {
+          "endpointId": 1,
+          "endpointName": "Endpoint 1",
+          "deviceType": "Unknown",
+          "functions": [
+            {
+              "functionCode": "UnverifiedFunction",
+              "traits": [
+                {
+                  "traitCode": "UnverifiedTrait",
+                  "parameter": {
+                    "type": "Integer",
+                    "readable": true,
+                    "writable": false,
+                    "subscribable": true,
+                    "unit": ""
+                  },
+                  "value": 123,
+                  "time": 0
+                }
+              ],
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
