@@ -330,11 +330,24 @@ def brightness_trait(device: StudioDevice, primary: Trait) -> Trait | None:
     return trait
 
 
-
 # Require *positive* light evidence, not a generic writable OnOff capability.
 # A standalone OnOff can describe relays, valves, or security equipment.
-_LIGHT_TYPES = {"Light", "DimmableLight", "ColorTemperatureLight", "ExtendedColorLight", "LightStrip"}
-_NEVER_LIGHT_TYPES = {"Lock", "DoorLock", "GarageDoor", "Valve", "Public", "Cover", "WindowCovering"}
+_LIGHT_TYPES = {
+    "Light",
+    "DimmableLight",
+    "ColorTemperatureLight",
+    "ExtendedColorLight",
+    "LightStrip",
+}
+_NEVER_LIGHT_TYPES = {
+    "Lock",
+    "DoorLock",
+    "GarageDoor",
+    "Valve",
+    "Public",
+    "Cover",
+    "WindowCovering",
+}
 
 
 def light_output(device: StudioDevice, primary: Trait) -> bool:
@@ -353,12 +366,12 @@ def light_output(device: StudioDevice, primary: Trait) -> bool:
 
 
 def _integer_trait(device: StudioDevice, primary: Trait, code: str) -> Trait | None:
-    key = TraitKey(
-        primary.key.device_id, primary.key.endpoint_id, "ColorControl", code
-    )
+    key = TraitKey(primary.key.device_id, primary.key.endpoint_id, "ColorControl", code)
     trait = device.traits.get(key)
     if (
-        trait is None or not trait.readable or not trait.writable
+        trait is None
+        or not trait.readable
+        or not trait.writable
         or trait.parameter.get("type") not in {"Integer", "UInt32", "Uint32", "uint32"}
         or trait.parameter.get("unit") not in (None, "", "mired", "mireds")
     ):
@@ -375,9 +388,13 @@ def color_temp_trait(device: StudioDevice, primary: Trait) -> Trait | None:
     maximum = finite_number(trait.parameter.get("max"))
     step = finite_number(trait.parameter.get("step", 1))
     if (
-        minimum is None or maximum is None or step is None
-        or not minimum.is_integer() or not maximum.is_integer()
-        or not step.is_integer() or not 1 <= step <= maximum - minimum
+        minimum is None
+        or maximum is None
+        or step is None
+        or not minimum.is_integer()
+        or not maximum.is_integer()
+        or not step.is_integer()
+        or not 1 <= step <= maximum - minimum
         or not 100 <= minimum < maximum <= 1000
     ):
         return None
@@ -477,7 +494,9 @@ def discover_capabilities(
                         color_temp_key = color_temp.key
                     if xy_color := xy_color_trait(device, trait):
                         xy_color_key = xy_color.key
-                    mode = TraitKey(key.device_id, key.endpoint_id, "ColorControl", "ColorMode")
+                    mode = TraitKey(
+                        key.device_id, key.endpoint_id, "ColorControl", "ColorMode"
+                    )
                     if mode in device.traits and device.traits[mode].readable:
                         color_mode_key = mode
                 elif trait.endpoint_type in {"Switch", "Outlet"}:
@@ -485,7 +504,10 @@ def discover_capabilities(
             if platform:
                 capabilities.append(
                     Capability(
-                        key, platform, "Power", "control",
+                        key,
+                        platform,
+                        "Power",
+                        "control",
                         brightness_key=brightness_key,
                         color_temp_key=color_temp_key,
                         xy_color_key=xy_color_key,

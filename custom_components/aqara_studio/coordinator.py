@@ -586,15 +586,23 @@ class AqaraStudioCoordinator(DataUpdateCoordinator[dict[str, StudioDevice]]):
             maximum = finite_number(trait.parameter.get("max"))
             step = finite_number(trait.parameter.get("step", 1))
             if (
-                type(value) is not int or minimum is None or maximum is None
-                or step is None or not minimum <= value <= maximum
-                or abs((value - minimum) / step - round((value - minimum) / step)) > 1e-8
+                type(value) is not int
+                or minimum is None
+                or maximum is None
+                or step is None
+                or not minimum <= value <= maximum
+                or abs((value - minimum) / step - round((value - minimum) / step))
+                > 1e-8
             ):
-                raise HomeAssistantError("Color temperature is outside the supported range")
+                raise HomeAssistantError(
+                    "Color temperature is outside the supported range"
+                )
         if key.trait_code == "ColorXY" and (
             type(value) is not int or not 0 <= value <= 4294967295
         ):
-            raise HomeAssistantError("XY color must be a packed unsigned 32-bit integer")
+            raise HomeAssistantError(
+                "XY color must be a packed unsigned 32-bit integer"
+            )
         try:
             await self.client.async_write_trait(key.as_dict(), value)
         except AqaraAuthError as err:

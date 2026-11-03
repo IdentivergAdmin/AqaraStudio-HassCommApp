@@ -36,7 +36,9 @@ async def async_get_config_entry_diagnostics(
     for device in coordinator.data.values():
         capabilities = discover_capabilities(device, coordinator.options)
         supported = {cap.key for cap in capabilities}
-        eligible = discover_capabilities(device, {**coordinator.options, "enable_controls": True})
+        eligible = discover_capabilities(
+            device, {**coordinator.options, "enable_controls": True}
+        )
         potential_light = sum(cap.platform == "light" for cap in eligible)
         light_candidates += potential_light
         enabled_lights += sum(cap.platform == "light" for cap in capabilities)
@@ -93,7 +95,9 @@ async def async_get_config_entry_diagnostics(
         "lighting": {
             "eligible_lights": light_candidates,
             "enabled_lights": enabled_lights,
-            "controls_opted_in": bool(coordinator.options.get("enable_controls", False)),
+            "controls_opted_in": bool(
+                coordinator.options.get("enable_controls", False)
+            ),
         },
         "live_button_observations": [
             {

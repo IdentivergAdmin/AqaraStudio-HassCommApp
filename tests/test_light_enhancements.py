@@ -22,9 +22,7 @@ from .entity_helpers import FakeCoordinator
 def add_color(coordinator: FakeCoordinator):
     """Add vendor-documented mired and packed XY traits to a light endpoint."""
     device = coordinator.data["synthetic-light"]
-    primary = next(
-        t for t in device.traits.values() if t.key.trait_code == "OnOff"
-    )
+    primary = next(t for t in device.traits.values() if t.key.trait_code == "OnOff")
     for code, metadata, value in (
         (
             "ColorTemperature",
@@ -38,7 +36,9 @@ def add_color(coordinator: FakeCoordinator):
         ),
         ("ColorMode", {"type": "Enum", "writable": False}, 2),
     ):
-        key = TraitKey(primary.key.device_id, primary.key.endpoint_id, "ColorControl", code)
+        key = TraitKey(
+            primary.key.device_id, primary.key.endpoint_id, "ColorControl", code
+        )
         device.traits[key] = Trait(
             key,
             {"readable": True, "writable": True, "subscribable": True} | metadata,
@@ -122,7 +122,8 @@ async def test_color_write_does_not_accept_unadvertised_capability(hass):
     coordinator = FakeCoordinator(hass, {"enable_controls": True})
     primary = add_color(coordinator)
     ct = next(
-        trait for trait in coordinator.data["synthetic-light"].traits.values()
+        trait
+        for trait in coordinator.data["synthetic-light"].traits.values()
         if trait.key.trait_code == "ColorTemperature"
     )
     ct.parameter["writable"] = False
