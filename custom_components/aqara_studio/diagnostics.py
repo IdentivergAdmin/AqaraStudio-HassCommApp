@@ -31,14 +31,21 @@ async def async_get_config_entry_diagnostics(
         for index, device_id in enumerate(coordinator.data, 1)
     }
     devices = []
+    light_candidates = 0
+    enabled_lights = 0
     for device in coordinator.data.values():
         capabilities = discover_capabilities(device, coordinator.options)
         supported = {cap.key for cap in capabilities}
+        eligible = discover_capabilities(device, {**coordinator.options, "enable_controls": True})
+        potential_light = sum(cap.platform == "light" for cap in eligible)
+        light_candidates += potential_light
+        enabled_lights += sum(cap.platform == "light" for cap in capabilities)
         devices.append(
             {
                 "device": aliases[device.device_id],
                 "present": device.present,
                 "reachable": device.reachable,
+                "eligible_lights": potential_light,
                 "capabilities": [
                     {
                         "platform": cap.platform,
@@ -83,6 +90,11 @@ async def async_get_config_entry_diagnostics(
             "partial_read_failures": coordinator.partial_read_failures,
         },
         "devices": devices,
+        "lighting": {
+            "eligible_lights": light_candidates,
+            "enabled_lights": enabled_lights,
+            "controls_opted_in": bool(coordinator.options.get("enable_controls", False)),
+        },
         "live_button_observations": [
             {
                 "device": aliases.get(item["device_id"], "unknown_device"),

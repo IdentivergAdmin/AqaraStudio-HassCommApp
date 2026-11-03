@@ -77,6 +77,7 @@ class AqaraStudioEntity(CoordinatorEntity):
             manufacturer=device.manufacturer,
             model=device.model,
             sw_version=device.firmware,
+            configuration_url=self.coordinator.client.host,
         )
         # Root Studio is identified with the same physical device namespace.
         gateway_id = device.gateway_id or self.coordinator.studio_id

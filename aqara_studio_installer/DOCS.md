@@ -4,6 +4,9 @@ This is a **one-shot Home Assistant Supervisor app** for people using **Settings
 
 ## Installation
 
+[Add this App repository to My Home Assistant](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FIdentivergAdmin%2FAqaraStudio-HassCommApp)
+
+
 1. In Home Assistant, open **Settings > Apps > Repositories**, add https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp, and close the dialog.
 2. Open **Settings > Apps > Install app**; select **Aqara Studio Integration Installer (Beta)**, then **Install**.
 3. On its **Configuration** tab leave replace_existing: false for a first install. Press **Start** once.
@@ -21,6 +24,14 @@ This is a **one-shot Home Assistant Supervisor app** for people using **Settings
 
 ## Upgrades and rollback
 
+Update the Aqara Studio Installer App to **0.1.1** in the Apps screen before
+using it to upgrade the integration. The updater never overwrites the installed
+integration unless `replace_existing: true` is selected. After the log reports
+v0.1.1b1 installed, restart Home Assistant Core. In the native integration's
+**Configure/Options** menu, enable verified light and switch controls only
+after checking the device eligibility and testing the actual light safely.
+
+
 If aqara_studio already exists, the default action does **not** overwrite it. For an intentional upgrade, set replace_existing: true and press **Start**. The old directory is moved to aqara_studio_installer_backups/ under the Home Assistant configuration directory before the new directory is activated. Back up Home Assistant first; restore the backed-up folder and restart Home Assistant Core to roll back. The one-shot installer does not automatically remove old backups.
 
 After copying the files, the App can be stopped or uninstalled. **Uninstalling the App does not remove the copied native integration.** To uninstall the native integration, remove its config entry and its custom_components/aqara_studio folder separately, following the main README.
@@ -29,4 +40,4 @@ After copying the files, the App can be stopped or uninstalled. **Uninstalling t
 
 This app requests **write access to the Home Assistant configuration directory**, because it must install code under custom_components/. It does not read or modify credentials or the .storage directory, but the mount is broad; review the code and only install from a trusted repository. It exposes no ports, requires no Supervisor API privilege, and never runs automatically at boot.
 
-The integration is **0.1.0b1 beta** and is not hardware-certified. Live tests with the M300 (especially contact/leak polarity and offline-state handling) remain required.
+The integration is **0.1.1b1 beta** and is not hardware-certified. Live tests with the M300 (especially contact/leak polarity and offline-state handling) remain required.

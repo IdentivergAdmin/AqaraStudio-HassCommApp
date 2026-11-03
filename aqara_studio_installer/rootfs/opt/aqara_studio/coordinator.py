@@ -47,6 +47,7 @@ from .device import (
     Trait,
     TraitKey,
     discover_capabilities,
+    finite_number,
     parse_device,
     strict_bool,
 )
@@ -233,6 +234,7 @@ class AqaraStudioCoordinator(DataUpdateCoordinator[dict[str, StudioDevice]]):
             manufacturer=device.manufacturer,
             model=device.model,
             sw_version=device.firmware,
+            configuration_url=self.client.host,
         )
 
     async def _async_reconcile_inventory(self, now: float) -> None:
@@ -566,7 +568,10 @@ class AqaraStudioCoordinator(DataUpdateCoordinator[dict[str, StudioDevice]]):
             if cap.platform in {"light", "switch"}
         ]
         permitted = {cap.key for cap in controls} | {
-            cap.brightness_key for cap in controls if cap.brightness_key
+            key
+            for cap in controls
+            for key in (cap.brightness_key, cap.color_temp_key, cap.xy_color_key)
+            if key is not None
         }
         if key not in permitted or not self.entity_available(key):
             raise HomeAssistantError("This Aqara Studio control is unavailable")
@@ -576,6 +581,20 @@ class AqaraStudioCoordinator(DataUpdateCoordinator[dict[str, StudioDevice]]):
             type(value) not in (int, float) or not 1 <= value <= 100
         ):
             raise HomeAssistantError("Brightness is outside the supported range")
+        if key.trait_code == "ColorTemperature":
+            minimum = finite_number(trait.parameter.get("min"))
+            maximum = finite_number(trait.parameter.get("max"))
+            step = finite_number(trait.parameter.get("step", 1))
+            if (
+                type(value) is not int or minimum is None or maximum is None
+                or step is None or not minimum <= value <= maximum
+                or abs((value - minimum) / step - round((value - minimum) / step)) > 1e-8
+            ):
+                raise HomeAssistantError("Color temperature is outside the supported range")
+        if key.trait_code == "ColorXY" and (
+            type(value) is not int or not 0 <= value <= 4294967295
+        ):
+            raise HomeAssistantError("XY color must be a packed unsigned 32-bit integer")
         try:
             await self.client.async_write_trait(key.as_dict(), value)
         except AqaraAuthError as err:

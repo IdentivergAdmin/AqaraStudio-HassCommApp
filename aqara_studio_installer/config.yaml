@@ -1,5 +1,5 @@
 name: "Aqara Studio Integration Installer (Beta)"
-version: "0.1.0"
+version: "0.1.1"
 slug: "aqara_studio_installer"
 description: "One-shot installer for the native Aqara Studio integration; restart Home Assistant afterward."
 url: "https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp"
