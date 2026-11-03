@@ -14,7 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "aqara_studio_installer" / "run.sh"
 
 
-def _write_integration(path: Path, version: str, *, domain: str = "aqara_studio") -> None:
+def _write_integration(
+    path: Path, version: str, *, domain: str = "aqara_studio"
+) -> None:
     path.mkdir(parents=True, exist_ok=True)
     (path / "manifest.json").write_text(
         json.dumps({"domain": domain, "version": version}), encoding="utf-8"
@@ -119,12 +121,8 @@ def test_current_version_noop_even_with_old_true_option(environment: Path):
     assert _backups(environment) == []
 
 
-@pytest.mark.parametrize(
-    "version", ["0.1.2b2", "0.1.2rc1", "0.1.2", "0.2.0a1"]
-)
-def test_downgrades_are_blocked_without_touching_files(
-    environment: Path, version: str
-):
+@pytest.mark.parametrize("version", ["0.1.2b2", "0.1.2rc1", "0.1.2", "0.2.0a1"])
+def test_downgrades_are_blocked_without_touching_files(environment: Path, version: str):
     installed = _installed(environment)
     _write_integration(installed, version)
     result = _run(environment)
