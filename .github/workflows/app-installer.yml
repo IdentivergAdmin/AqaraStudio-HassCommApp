@@ -31,3 +31,19 @@ jobs:
         run: python3 -m pytest -q -c /dev/null app_tests/test_installer.py
       - name: Build installer Docker image
         run: docker build --pull -t aqara-studio-installer:ci ./aqara_studio_installer
+      - name: Smoke test actual Alpine installer (first install and no-op)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/aqara-config"
+          docker run --rm --init \
+            -v "$RUNNER_TEMP/aqara-config:/homeassistant" \
+            aqara-studio-installer:ci | tee "$RUNNER_TEMP/aqara-first.log"
+          grep -q "FIRST INSTALL" "$RUNNER_TEMP/aqara-first.log"
+          grep -q "SUCCESS" "$RUNNER_TEMP/aqara-first.log"
+          test -f "$RUNNER_TEMP/aqara-config/custom_components/aqara_studio/manifest.json"
+          docker run --rm --init \
+            -v "$RUNNER_TEMP/aqara-config:/homeassistant" \
+            aqara-studio-installer:ci | tee "$RUNNER_TEMP/aqara-current.log"
+          grep -q "ALREADY CURRENT" "$RUNNER_TEMP/aqara-current.log"
+          test ! -e "$RUNNER_TEMP/aqara-config/aqara_studio_installer_backups"
