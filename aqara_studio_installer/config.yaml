@@ -1,7 +1,7 @@
 name: "Aqara Studio Integration Installer (Beta)"
-version: "0.1.1"
+version: "0.1.2"
 slug: "aqara_studio_installer"
-description: "One-shot installer for the native Aqara Studio integration; restart Home Assistant afterward."
+description: "One-click native integration installer/upgrader with backups. Restart Home Assistant Core afterward."
 url: "https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp"
 arch:
   - amd64
@@ -10,11 +10,11 @@ homeassistant: "2026.10.0"
 startup: once
 boot: manual_only
 stage: experimental
-init: false
+# Minimal Alpine has no S6; use Supervisor's Docker init.
+init: true
 map:
   - type: homeassistant_config
     read_only: false
-options:
-  replace_existing: false
-schema:
-  replace_existing: bool
+# This app no longer needs confirmation toggles; old options are ignored.
+options: {}
+schema: false
