@@ -52,3 +52,13 @@ async def test_unknown_numeric_button_value_remains_observable(
     report = await async_get_config_entry_diagnostics(hass, config_entry)
     assert report["live_button_observations"][0]["numeric_value"] == 99
     assert report["live_button_observations"][0]["device"].startswith("device_")
+
+
+async def test_lighting_eligibility_is_redacted_and_actionable(
+    hass, config_entry, coordinator
+):
+    report = await async_get_config_entry_diagnostics(hass, config_entry)
+    assert isinstance(report["lighting"]["eligible_lights"], int)
+    assert isinstance(report["lighting"]["enabled_lights"], int)
+    assert report["lighting"]["enabled_lights"] <= report["lighting"]["eligible_lights"]
+    assert isinstance(report["lighting"]["controls_opted_in"], bool)

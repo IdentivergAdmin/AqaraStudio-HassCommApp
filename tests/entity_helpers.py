@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -42,6 +43,7 @@ class FakeCoordinator(DataUpdateCoordinator):
         )
         self.data = fixture_devices()
         self.studio_id = "synthetic-studio"
+        self.client = SimpleNamespace(host="http://studio.test")
         self.options = DEFAULT_OPTIONS | (options or {})
         self.transport_available = True
         self.async_write_trait = AsyncMock()

@@ -248,6 +248,9 @@ class Capability:
     diagnostic: bool = False
     enabled_default: bool = True
     brightness_key: TraitKey | None = None
+    color_temp_key: TraitKey | None = None
+    xy_color_key: TraitKey | None = None
+    color_mode_key: TraitKey | None = None
 
 
 # Unit aliases are formats seen in the official data model, not unit guesses
@@ -327,6 +330,92 @@ def brightness_trait(device: StudioDevice, primary: Trait) -> Trait | None:
     return trait
 
 
+# Require *positive* light evidence, not a generic writable OnOff capability.
+# A standalone OnOff can describe relays, valves, or security equipment.
+_LIGHT_TYPES = {
+    "Light",
+    "DimmableLight",
+    "ColorTemperatureLight",
+    "ExtendedColorLight",
+    "LightStrip",
+}
+_NEVER_LIGHT_TYPES = {
+    "Lock",
+    "DoorLock",
+    "GarageDoor",
+    "Valve",
+    "Public",
+    "Cover",
+    "WindowCovering",
+}
+
+
+def light_output(device: StudioDevice, primary: Trait) -> bool:
+    """Recognize a light from its type or same-endpoint lighting functions."""
+    if primary.endpoint_type in _NEVER_LIGHT_TYPES | {"Switch", "Outlet"}:
+        return False
+    if primary.endpoint_type in _LIGHT_TYPES:
+        return True
+    functions = {
+        key.function_code
+        for key in device.traits
+        if key.endpoint_id == primary.key.endpoint_id
+    }
+    # Handles real light strips whose endpoint labels aren't the literal "Light".
+    return bool({"Lighting", "ColorControl"} & functions)
+
+
+def _integer_trait(device: StudioDevice, primary: Trait, code: str) -> Trait | None:
+    key = TraitKey(primary.key.device_id, primary.key.endpoint_id, "ColorControl", code)
+    trait = device.traits.get(key)
+    if (
+        trait is None
+        or not trait.readable
+        or not trait.writable
+        or trait.parameter.get("type") not in {"Integer", "UInt32", "Uint32", "uint32"}
+        or trait.parameter.get("unit") not in (None, "", "mired", "mireds")
+    ):
+        return None
+    return trait
+
+
+def color_temp_trait(device: StudioDevice, primary: Trait) -> Trait | None:
+    """Color temperature must advertise hardware mired bounds; never assume."""
+    trait = _integer_trait(device, primary, "ColorTemperature")
+    if trait is None:
+        return None
+    minimum = finite_number(trait.parameter.get("min"))
+    maximum = finite_number(trait.parameter.get("max"))
+    step = finite_number(trait.parameter.get("step", 1))
+    if (
+        minimum is None
+        or maximum is None
+        or step is None
+        or not minimum.is_integer()
+        or not maximum.is_integer()
+        or not step.is_integer()
+        or not 1 <= step <= maximum - minimum
+        or not 100 <= minimum < maximum <= 1000
+    ):
+        return None
+    return trait
+
+
+def xy_color_trait(device: StudioDevice, primary: Trait) -> Trait | None:
+    """ColorXY uses documented uint32 packing, not a guessed RGB conversion."""
+    trait = _integer_trait(device, primary, "ColorXY")
+    if trait is None:
+        return None
+    if trait.parameter.get("unit") not in (None, ""):
+        return None
+    minimum = finite_number(trait.parameter.get("min", 0))
+    maximum = finite_number(trait.parameter.get("max", 4294967295))
+    step = finite_number(trait.parameter.get("step", 1))
+    if minimum != 0 or maximum != 4294967295 or step != 1:
+        return None
+    return trait
+
+
 def discover_capabilities(
     device: StudioDevice, options: Mapping[str, Any] | None = None
 ) -> list[Capability]:
@@ -393,17 +482,36 @@ def discover_capabilities(
             )
             platform = None
             brightness_key = None
+            color_temp_key = None
+            xy_color_key = None
+            color_mode_key = None
             if controls:
-                if trait.endpoint_type == "Light":
+                if light_output(device, trait):
                     platform = "light"
                     if brightness := brightness_trait(device, trait):
                         brightness_key = brightness.key
+                    if color_temp := color_temp_trait(device, trait):
+                        color_temp_key = color_temp.key
+                    if xy_color := xy_color_trait(device, trait):
+                        xy_color_key = xy_color.key
+                    mode = TraitKey(
+                        key.device_id, key.endpoint_id, "ColorControl", "ColorMode"
+                    )
+                    if mode in device.traits and device.traits[mode].readable:
+                        color_mode_key = mode
                 elif trait.endpoint_type in {"Switch", "Outlet"}:
                     platform = "switch"
             if platform:
                 capabilities.append(
                     Capability(
-                        key, platform, "Power", "control", brightness_key=brightness_key
+                        key,
+                        platform,
+                        "Power",
+                        "control",
+                        brightness_key=brightness_key,
+                        color_temp_key=color_temp_key,
+                        xy_color_key=xy_color_key,
+                        color_mode_key=color_mode_key,
                     )
                 )
     return capabilities

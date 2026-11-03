@@ -14,7 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "aqara_studio_installer" / "run.sh"
 
 
-def _run(tmp_path: Path, *, replacement: bool = False) -> subprocess.CompletedProcess[str]:
+def _run(
+    tmp_path: Path, *, replacement: bool = False
+) -> subprocess.CompletedProcess[str]:
     config = tmp_path / "homeassistant"
     options = tmp_path / "options.json"
     options.write_text(json.dumps({"replace_existing": replacement}), encoding="utf-8")
@@ -35,9 +37,7 @@ def installed_fixture(tmp_path: Path) -> Path:
     config.mkdir()
     source = tmp_path / "payload"
     source.mkdir()
-    (source / "manifest.json").write_text(
-        '{"version":"0.1.0b1"}', encoding="utf-8"
-    )
+    (source / "manifest.json").write_text('{"version":"0.1.0b1"}', encoding="utf-8")
     (source / "__init__.py").write_text("# test payload\n", encoding="utf-8")
     (source / "config_flow.py").write_text("# test payload\n", encoding="utf-8")
     return tmp_path
@@ -45,7 +45,9 @@ def installed_fixture(tmp_path: Path) -> Path:
 
 def test_supervisor_metadata():
     repo = yaml.safe_load((ROOT / "repository.yaml").read_text())
-    addon = yaml.safe_load((ROOT / "aqara_studio_installer" / "config.yaml").read_text())
+    addon = yaml.safe_load(
+        (ROOT / "aqara_studio_installer" / "config.yaml").read_text()
+    )
     assert repo["name"]
     assert addon["slug"] == "aqara_studio_installer"
     assert addon["arch"] == ["amd64", "aarch64"]
@@ -117,9 +119,7 @@ def test_payload_matches_native_integration():
     packaged = ROOT / "aqara_studio_installer" / "rootfs" / "opt" / "aqara_studio"
     assert source.exists() and packaged.exists()
     src_files = {
-        p.relative_to(source): p.read_bytes()
-        for p in source.rglob("*")
-        if p.is_file()
+        p.relative_to(source): p.read_bytes() for p in source.rglob("*") if p.is_file()
     }
     pkg_files = {
         p.relative_to(packaged): p.read_bytes()
