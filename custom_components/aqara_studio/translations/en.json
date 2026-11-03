@@ -1,0 +1,112 @@
+{
+  "title": "Aqara Studio",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Aqara Studio",
+        "description": "Connect directly to the local Aqara Studio Open API. HTTP sends the bearer token unencrypted; use HTTPS where available or a trusted local network.",
+        "data": {
+          "host": "Aqara Studio host or URL",
+          "token": "Developer API token"
+        },
+        "data_description": {
+          "host": "Local hostname, IP address, or HTTP(S) origin. HTTPS certificate verification is always enabled.",
+          "token": "Stored in the Home Assistant config entry. Never post it in an issue or include it in a screenshot."
+        }
+      },
+      "mapping": {
+        "title": "Confirm sensor meanings",
+        "description": "The Aqara specification does not define contact or leak boolean polarity. Choose a mapping only if you have verified it. Otherwise keep Unconfirmed, finish setup, inspect raw values beside Studio, then change these options after physical tests. Each mapping applies to all included sensors of that type.",
+        "data": {
+          "contact_polarity": "Confirmed contact mapping",
+          "leak_polarity": "Confirmed leak mapping"
+        },
+        "data_description": {
+          "contact_polarity": "Confirm against Studio and a physical open/close test. Unconfirmed sensors report unknown and expose their raw value.",
+          "leak_polarity": "Confirm against Studio and a safe wet/dry test. Unconfirmed sensors report unknown and expose their raw value."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Renew Aqara Studio credentials",
+        "data": {
+          "token": "Developer API token"
+        },
+        "data_description": {
+          "token": "Stored in the Home Assistant config entry. Never post it in an issue or include it in a screenshot."
+        }
+      },
+      "reconfigure": {
+        "title": "Update the Studio connection",
+        "description": "The original identity gateway must still be present. Leave the token blank to keep the existing credential.",
+        "data": {
+          "host": "Aqara Studio host or URL",
+          "token": "Developer API token"
+        },
+        "data_description": {
+          "host": "Local hostname, IP address, or HTTP(S) origin. HTTPS certificate verification is always enabled.",
+          "token": "Stored in the Home Assistant config entry. Never post it in an issue or include it in a screenshot."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach the Studio API. Check the address, local network, and API availability.",
+      "invalid_auth": "Studio rejected the token or its access scope.",
+      "invalid_host": "Enter a hostname, IP address, or HTTP(S) origin without user credentials, query parameters, or an unrelated path.",
+      "unsupported_response": "Studio did not provide the documented inventory and stable gateway identity."
+    },
+    "abort": {
+      "already_configured": "This Studio instance is already configured.",
+      "wrong_instance": "This address or credential belongs to a different Studio instance. The original identity gateway must be present.",
+      "reauth_successful": "Aqara Studio credentials updated successfully.",
+      "reconfigure_successful": "Aqara Studio connection updated successfully."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Aqara Studio options",
+        "data": {
+          "contact_polarity": "Confirmed contact mapping",
+          "leak_polarity": "Confirmed leak mapping",
+          "poll_interval": "REST fallback interval (seconds)",
+          "reconcile_interval": "State reconciliation interval with push (seconds)",
+          "inventory_interval": "Inventory discovery interval (seconds)",
+          "enable_websocket": "Enable WebSocket push",
+          "enable_button_events": "Enable experimental live button events",
+          "enable_controls": "Enable verified light and switch controls",
+          "excluded_devices": "Exclude devices"
+        },
+        "data_description": {
+          "contact_polarity": "Confirm against Studio and a physical open/close test. Unconfirmed sensors report unknown and expose their raw value.",
+          "leak_polarity": "Confirm against Studio and a safe wet/dry test. Unconfirmed sensors report unknown and expose their raw value.",
+          "poll_interval": "Used when push is disabled or disconnected. Failures back off automatically.",
+          "reconcile_interval": "Refresh current state while push is connected. Must be at least the fallback interval.",
+          "inventory_interval": "Find newly added devices without restarting Home Assistant.",
+          "enable_websocket": "Use the documented local push channel, with REST reconciliation and polling fallback.",
+          "enable_button_events": "Only newly received live ButtonEvent updates produce events. Cached values never generate presses.",
+          "enable_controls": "Read-only by default. Only explicitly writable, supported lights and switches gain controls.",
+          "excluded_devices": "Excluded devices are not polled. Existing Home Assistant registry entries are retained."
+        }
+      }
+    },
+    "error": {
+      "invalid_intervals": "The state reconciliation interval must be at least the fallback polling interval."
+    }
+  },
+  "selector": {
+    "contact_polarity": {
+      "options": {
+        "unconfirmed": "Unconfirmed — keep state unknown",
+        "true_is_open": "Verified: true means open",
+        "false_is_open": "Verified: false means open"
+      }
+    },
+    "leak_polarity": {
+      "options": {
+        "unconfirmed": "Unconfirmed — keep state unknown",
+        "true_is_wet": "Verified: true means wet",
+        "false_is_wet": "Verified: false means wet"
+      }
+    }
+  }
+}

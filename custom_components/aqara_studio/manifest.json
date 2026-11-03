@@ -1,0 +1,12 @@
+{
+  "domain": "aqara_studio",
+  "name": "Aqara Studio",
+  "codeowners": ["@IdentivergAdmin"],
+  "config_flow": true,
+  "documentation": "https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp",
+  "integration_type": "hub",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp/issues",
+  "requirements": [],
+  "version": "0.1.0b1"
+}
