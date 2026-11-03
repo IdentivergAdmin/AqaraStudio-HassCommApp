@@ -78,12 +78,18 @@ Install **Aqara Studio Integration Installer (Beta)** from **Apps**, then press
 The one-shot installer stopping is normal. **Do not put your API token in the
 installer**; only enter it in the native Aqara Studio config flow.
 
-**Upgrading from an earlier installer:** back up Home Assistant, update the
-Aqara Studio installer App from Apps, open its Configuration tab, explicitly set
-`replace_existing: true`, press Start once, verify the success log and restart
-Home Assistant Core. An old integration folder is backed up under
-`aqara_studio_installer_backups/` before replacement. Leaving
-`replace_existing: false` safely leaves an existing integration untouched.
+**Upgrades are now one Start, no toggles:** update the **Installer App** to
+**v0.1.2 or later**, then press **Start** once and read its Logs.
+The installer automatically compares native versions: **UPGRADE** makes a backup
+and installs newer code, **ALREADY CURRENT** makes no changes or backups, and
+**DOWNGRADE BLOCKED** refuses an older package. **Restart Home Assistant Core
+only after FIRST INSTALL or UPGRADE reports SUCCESS.** The previous
+`replace_existing` option is gone and any old saved value is ignored.
+
+**Current installed native v0.1.1b1?** Upgrading just the Installer App to
+v0.1.2 should report **ALREADY CURRENT**. There is no reason to reinstall or
+restart Core when the native code is already the bundled version.
+See [the simplified upgrade/rollback guide](aqara_studio_installer/DOCS.md).
 
 ### HACS custom integration
 
