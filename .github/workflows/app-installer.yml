@@ -1,0 +1,33 @@
+name: Supervisor App Installer
+on:
+  push:
+    paths:
+      - "repository.yaml"
+      - "aqara_studio_installer/**"
+      - "custom_components/aqara_studio/**"
+      - "tests/test_installer.py"
+      - ".github/workflows/app-installer.yml"
+  pull_request:
+    paths:
+      - "repository.yaml"
+      - "aqara_studio_installer/**"
+      - "custom_components/aqara_studio/**"
+      - "tests/test_installer.py"
+      - ".github/workflows/app-installer.yml"
+permissions:
+  contents: read
+jobs:
+  validate-app:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Check shell syntax
+        run: bash -n aqara_studio_installer/run.sh
+      - name: Verify installer package matches the native integration
+        run: diff -qr custom_components/aqara_studio aqara_studio_installer/rootfs/opt/aqara_studio
+      - name: Install validation dependencies
+        run: python3 -m pip install --break-system-packages pytest PyYAML
+      - name: Run installer tests
+        run: python3 -m pytest -q tests/test_installer.py
+      - name: Build installer Docker image
+        run: docker build --pull -t aqara-studio-installer:ci ./aqara_studio_installer

@@ -274,3 +274,19 @@ or firmware has passed live tests.
 
 Code and original community icon assets use the [MIT license](LICENSE). Aqara and
 Home Assistant names remain the property of their respective owners.
+
+## Install from Home Assistant's Apps repository screen
+
+**This is a native custom integration, not an always-running App.** For Home Assistant OS/Supervisor users who are already at **Settings > Apps > Repositories**, this repository also includes a small **Aqara Studio Integration Installer (Beta)** App.
+
+1. Add https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp to the Apps repository manager.
+2. Find **Aqara Studio Integration Installer (Beta)** under **Settings > Apps > Install app**.
+3. Install it, leave the default **replace_existing = false**, and press **Start** once.
+4. Read its Logs; **Stopped** after a successful copy is normal for this one-shot installer.
+5. Restart **Home Assistant Core**, then add **Aqara Studio** under **Settings > Devices & services**.
+6. Enter your local Studio host and Developer API token in the native integration setup, **not** in the installer.
+
+The installer carries a frozen copy of the exact integration source in its Docker build context, and has no runtime GitHub download or background process. It writes only the native custom_components/aqara_studio folder and, on explicitly requested upgrades, saves the previous folder in aqara_studio_installer_backups/. No existing REST or Matter entities are removed. See the [App installation and security guide](aqara_studio_installer/DOCS.md).
+
+The alternative **HACS custom repository** workflow continues to work for users who prefer HACS (HACS is separate from the Apps repository manager). Both methods install the same native integration. Do not install it with both package managers at the same time.
+

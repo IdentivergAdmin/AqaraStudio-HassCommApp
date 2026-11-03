@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <title>Aqara Studio community integration</title>
+  <desc>An original connected-hub symbol; not an Aqara corporate mark.</desc>
+  <g fill="none" stroke="#087f8c" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M128 75V48M85 106 61 91M171 106l24-15M85 157 61 174M171 157l24 17M128 184v25"/>
+    <rect x="78" y="78" width="100" height="100" rx="23"/>
+  </g>
+  <g fill="#087f8c">
+    <circle cx="128" cy="32" r="17"/>
+    <circle cx="45" cy="81" r="17"/>
+    <circle cx="211" cy="81" r="17"/>
+    <circle cx="45" cy="185" r="17"/>
+    <circle cx="211" cy="185" r="17"/>
+    <circle cx="128" cy="224" r="17"/>
+  </g>
+  <path d="M108 139v-34h40v47" fill="none" stroke="#087f8c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="132" cy="128" r="6" fill="#087f8c"/>
+</svg>
