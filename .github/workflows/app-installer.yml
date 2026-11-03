@@ -28,6 +28,6 @@ jobs:
       - name: Install validation dependencies
         run: python3 -m pip install --break-system-packages pytest pytest-timeout PyYAML
       - name: Run installer tests
-        run: python3 -m pytest -q app_tests/test_installer.py
+        run: python3 -m pytest -q -c /dev/null app_tests/test_installer.py
       - name: Build installer Docker image
         run: docker build --pull -t aqara-studio-installer:ci ./aqara_studio_installer
