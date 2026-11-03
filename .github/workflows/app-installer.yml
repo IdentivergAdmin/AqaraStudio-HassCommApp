@@ -26,7 +26,7 @@ jobs:
       - name: Verify installer package matches the native integration
         run: diff -qr custom_components/aqara_studio aqara_studio_installer/rootfs/opt/aqara_studio
       - name: Install validation dependencies
-        run: python3 -m pip install --break-system-packages pytest PyYAML
+        run: python3 -m pip install --break-system-packages pytest pytest-timeout PyYAML
       - name: Run installer tests
         run: python3 -m pytest -q app_tests/test_installer.py
       - name: Build installer Docker image
