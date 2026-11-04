@@ -46,7 +46,6 @@ from .device import (
     Trait,
     TraitKey,
     discover_capabilities,
-    finite_number,
     numeric_parameter,
     parse_device,
     strict_bool,
