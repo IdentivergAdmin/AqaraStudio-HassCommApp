@@ -15,7 +15,10 @@ reference until the corresponding acceptance steps pass.
    Check that the installed `manifest.json` version matches the intended beta.
 5. Add the integration in **Settings → Devices & services**, entering the local
    Studio host and Developer API token. Do not share the token with maintainers.
-6. Leave controls and experimental button events disabled initially.
+6. Keep experimental button events and advanced switch/outlet controls
+   disabled initially. Writable, positively identified lights are enabled
+   by default; do not invoke their actions before choosing a harmless
+   device and confirming its writable traits.
 
 ## A. Critical contact path
 
@@ -119,15 +122,38 @@ state trait is a different case and is not automatically invalid.
 
 ### Supported switch/light controls
 
-1. Choose a harmless test light or noncritical load; review its device type and
-   advertised writable traits. Keep locks, garage actuators and other sensitive
-   devices outside this beta's control scope.
-2. Enable supported controls in options. Verify only eligible controls appear.
-3. Issue on/off and, if advertised/supported, brightness changes.
-4. Confirm the physical result and the subsequent reported state. A successful
-   request response alone does not prove actuation.
-5. Verify unavailable/read-only targets cannot be actuated through this path.
-6. Disable controls and confirm the entry returns to read-only operation.
+1. Choose a harmless test light or noncritical load; confirm its actual
+   advertised writable traits. Keep locks, garage actuators and other
+   sensitive devices outside this beta's control scope.
+2. Native light control is enabled by default for positively identified
+   writable lights. **Advanced switches/outlets remain opt-in**.
+3. Check the running native integration version. On **v0.1.4b1**, the
+   anonymized M300 strip regression expects `supported_color_modes` to
+   contain `xy` and `color_temp`, with
+   `min_color_temp_kelvin: 2703` and
+   `max_color_temp_kelvin: 6536`.
+4. Under **Tools → States**, inspect the `light` entity attributes. The
+   **Set state** control does **not** communicate with hardware. A light
+   that is Off may legitimately show `brightness: null` and
+   `color_mode: null`. `supported_features: 0` does not mean
+   brightness/color is unsupported.
+5. For **actual** hardware control, click the light name in the device's
+   Controls card or use **Tools → Actions** with `light.turn_on`.
+   Test and physically confirm: on/off, brightness 50%, 4000 K white,
+   then a safe XY color.
+6. After each action, verify the physical strip changes and that Studio
+   and Home Assistant eventually report consistent values.
+   An API acknowledgement or entity state transition alone is not
+   sufficient to prove color control.
+7. Verify unavailable/read-only targets cannot be actuated.
+   Disable light controls in Options and verify writes are blocked;
+   re-enable only after completing physical acceptance.
+
+**Stop and keep the working REST/Matter state path** if the documented
+modes are absent, physical color does not change, or write errors occur.
+Export the sanitized diagnostics showing `light_features` and
+`light_profiles`. Do not expose private tokens, raw device IDs or
+your complete Studio configuration.
 
 Cover controls, lock operations and arbitrary device commands are not supported.
 

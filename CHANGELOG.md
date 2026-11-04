@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.1.4b1 — 2026-11-04
+
+**M300 real-diagnostic color compatibility fix.** Addresses writable
+ColorXY and ColorTemperature points previously rejected despite
+brightness and on/off working.
+
+- Permit the observed M300 ColorXY metadata maximum **4294967303**
+  (uint32 maximum + 8) while continuing to constrain every outgoing
+  XY value to the actual uint32 range **0–4294967295**.
+- Recognize separately validated **Kelvin (2703–6536 K)** and
+  **mired (typically 153–500)** ColorTemperature representations.
+  Convert requests and readback using the correct raw representation.
+- Add fail-closed checks for contradictory units, invalid metadata,
+  unsupported endpoints and out-of-range writes.
+- Add a public **anonymized M300 capability fixture** matching the
+  actual diagnostics, plus physical boundary and coordinator
+  authorization regression coverage.
+- Correct **Tools → States / Tools → Actions** guidance and explain
+  App vs native version numbers and expected upgrade logs.
+- Bundle with **Installer App 0.1.5**, retaining automatic backup and
+  no-toggle idempotent upgrades. See
+  [Release Verification](docs/RELEASE_VERIFICATION.md).
+
+**CI is not physical certification**: actual LED-strip color writes must
+still be verified on hardware before declaring acceptance.
+
+
 ## 0.1.3b1 — 2026-11-04
 
 - Recognize Aqara-spec **optional min/max/step metadata** for writable

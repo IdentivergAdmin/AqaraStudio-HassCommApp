@@ -17,7 +17,7 @@ the M300 to advertise an outward Matter Bridge role.
 
 ## Beta status
 
-Version **0.1.3b1** is a beta update. Automated tests use synthetic fixtures
+Version **0.1.4b1** is a beta update. Automated tests use synthetic fixtures
 derived from the current vendor contract. A successful test suite is not a live
 hub compatibility certification. Physical device acceptance is still required;
 see [the acceptance runbook](docs/ACCEPTANCE.md).
@@ -37,7 +37,7 @@ state change. Missing or unrecognized values never mean closed or dry.
 1. Add the integration and leave the working REST entity enabled. Leave the
    polarity settings **Unconfirmed** during setup unless you have already
    verified the actual raw values.
-2. Inspect the new contact entity's `raw_value` under **Developer tools → States**.
+2. Inspect the new contact entity's `raw_value` under **Tools → States**.
 3. Close and open a test contact, checking both Studio and the working entity.
 4. In the Aqara Studio integration options, set **Contact polarity** to the
    mapping you actually observed: true means open, or false means open.
@@ -79,16 +79,20 @@ The one-shot installer stopping is normal. **Do not put your API token in the
 installer**; only enter it in the native Aqara Studio config flow.
 
 **Upgrades are now one Start, no toggles:** update the **Installer App** to
-**v0.1.4 or later**, then press **Start** once and read its Logs.
+**v0.1.5 or later**, then press **Start** once and read its Logs.
 The installer automatically compares native versions: **UPGRADE** makes a backup
 and installs newer code, **ALREADY CURRENT** makes no changes or backups, and
 **DOWNGRADE BLOCKED** refuses an older package. **Restart Home Assistant Core
 only after FIRST INSTALL or UPGRADE reports SUCCESS.** The previous
 `replace_existing` option is gone and any old saved value is ignored.
 
-**Current installed native v0.1.2b1?** Installer App v0.1.4 upgrades it to
-native **v0.1.3b1**, with an automatic backup. Restart Core on success.
-Once installed, repeated Starts correctly report **ALREADY CURRENT**.
+**Current installed native v0.1.3b1?** Installer App **v0.1.5** upgrades it to
+native **v0.1.4b1** with an automatic backup. The expected log is
+`UPGRADE 0.1.3b1 -> 0.1.4b1` followed by `SUCCESS`.
+Restart **Core only after that successful installer run**. A repeated
+Start reports `ALREADY CURRENT` without changing anything.
+The **App version** and **native integration version** are intentionally
+different; see [Release Verification](docs/RELEASE_VERIFICATION.md).
 See [the simplified upgrade/rollback guide](aqara_studio_installer/DOCS.md).
 
 ### HACS custom integration
@@ -160,7 +164,7 @@ They appear as Home Assistant `light` entities, while the previous
 `Output state` sensor is preserved so existing automations are not broken.
 
 For an already-configured installation, use **Settings → Apps → Aqara Studio
-Integration Installer (Beta) → Update to v0.1.3 → Start once**, then restart
+Integration Installer (Beta) → Update to v0.1.5 → Start once**, then restart
 Home Assistant Core after a successful `UPGRADE` log. Open **Settings →
 Devices & services → Aqara Studio → Devices → ClosetLight**. A new native light
 entity should appear. The old `Output state` sensor can remain; do not delete
@@ -184,8 +188,9 @@ For eligible lighting endpoints:
 - XY color control uses Aqara's documented packed uint32 CIE XY encoding,
   only where `ColorControl/ColorXY` is explicitly readable/writable with a
   verified compatible data type.
-- White color temperature uses documented **mired** units and
-  hardware-advertised `ColorControl/ColorTemperature` min/max/step.
+- White color temperature supports **mired or Kelvin API definitions**,
+  identified from the unit and validated bounds. The M300 reports
+  2703–6536 K even though its Zigbee hardware uses mired steps.
 - The optional read-only `ColorControl/ColorMode` value identifies the active
   XY vs white-temperature presentation where supplied. Invalid values remain
   unknown, not guessed.
@@ -204,39 +209,81 @@ If lights do not appear, download sanitized integration diagnostics and inspect
 raw tokens or device identifiers. The device model may advertise functions that
 this release cannot safely control; unsupported traits are intentionally skipped.
 
-### Finding the brightness and color controls
+### RGB strip controls and proof of capability (Home Assistant 2026.10.4)
 
-The device page's **Controls** section normally shows only an on/off switch.
-**Click the light's name**, not the toggle, to open Home Assistant's
-**more-info** dialog. The brightness slider and color/white-temperature
-controls live in that dialog when the integration advertises them.
+On the device page, the **Controls** card shows the on/off switch. Click the
+**ClosetLight entity name**, not the switch, to open the light's more-info
+dialog. Brightness and color selectors appear according to the
+`supported_color_modes` reported by Home Assistant.
 
-If this dialog is **still only a toggle**, open **Developer Tools → States**,
-select the `light` entity (for example `light.closetlight`), and inspect
-`supported_color_modes`, `color_mode`, and `brightness`:
+Use **Tools → States** to inspect `light.closetlight`. **Do not press
+"Set state" to test hardware**: it only edits Home Assistant's state
+representation and never commands Aqara Studio. When a light is **Off**,
+`brightness: null` and `color_mode: null` can be normal. Also,
+`supported_features: 0` is normal for a light with no extra effects,
+flash or transition features. Brightness and color are advertised using
+`supported_color_modes`, **not** `supported_features`.
 
-- `[onoff]` means Aqara Studio did **not** expose compatible writable
-  brightness/color metadata to this integration. A slider cannot be displayed
-  by changing integration options.
-- `[brightness]` means dimming is available.
-- `[xy, color_temp]` means full color and warm/cool white are available.
+**Expected on native v0.1.4b1 for the verified M300 ClosetLight:**
 
-Aqara data-model values for **CurrentLevel**, **ColorXY**, and
-**ColorTemperature** can omit their optional numeric min/max/step metadata.
-Native **v0.1.3b1** recognizes those documented defaults. It still refuses
-explicitly invalid parameters or unadvertised writable access.
+```yaml
+supported_color_modes:
+  - xy
+  - color_temp
+min_color_temp_kelvin: 2703
+max_color_temp_kelvin: 6536
+```
 
-For further diagnosis, use **Aqara Studio integration → menu → Download diagnostics**
-and find the anonymized light under `devices[].light_features` and
-`devices[].light_trait_metadata`. The report shows capability availability,
-parameter types/units and numeric limits without including your API token,
-device ID, device names or actual sensor/color values. Share only this
-sanitized export, never a raw Studio API response containing credentials.
+The exact order of `xy` and `color_temp` is irrelevant. These modes
+also support brightness; Home Assistant does not add `brightness` as a
+separate supported mode alongside color modes.
 
-If an option shows the literal `enable_light_controls` despite a checked box,
-the code already includes its translated label. Hard-refresh the HA browser tab
-(**Ctrl+Shift+R**) after Core restart. The option is already enabled; it
-does not control which brightness or color modes the API exposes.
+**Why previous versions failed:** The anonymized production diagnostics
+showed a writable `ColorXY` descriptor with `max=4294967303` (eight
+above a strict uint32 maximum) and a writable
+`ColorTemperature` descriptor with `min=2703, max=6536`,
+representing Kelvin rather than the generic published mired range.
+Earlier code rejected both. The new decoder accepts the narrowly
+observed descriptor exception, but still writes XY values only within
+`0..4294967295`. It also converts and validates mired vs Kelvin
+**according to the device representation** rather than sending a mired
+value when the device expects Kelvin.
+
+After the native version is installed and Core restarted, use
+**Tools → Actions → light.turn_on**, targeting `light.closetlight`,
+for a controlled physical test. Begin with 50% brightness; then
+4000 K color temperature; then an XY color. Example Actions data:
+
+```yaml
+action: light.turn_on
+target:
+  entity_id: light.closetlight
+data:
+  brightness_pct: 50
+```
+
+```yaml
+action: light.turn_on
+target:
+  entity_id: light.closetlight
+data:
+  color_temp_kelvin: 4000
+```
+
+Do not claim a successful physical action from the presence of UI controls.
+Verify the actual LED strip changes and Studio readback matches.
+
+For further diagnosis, download **Aqara Studio → menu → Download
+diagnostics**. The sanitized export includes
+`devices[].light_features`, `devices[].light_profiles` and
+`devices[].light_trait_metadata`. The report omits API tokens, raw
+color values and household device identifiers.
+
+The native `enable_light_controls` option is already enabled when
+checked. If its label is displayed literally after an upgrade,
+hard-refresh the browser (**Ctrl+Shift+R**); the source translation
+contains **Enable native light controls**. It does not configure
+individual color modes.
 
 ## Supported capabilities
 
@@ -258,7 +305,7 @@ hundreds of unnecessary entities.
 | `Output / OnOff` | Read-only power state; opt-in controls | Exact endpoint type `Light`, `Switch` or `Outlet` and writable access required for controls |
 | `LevelControl / CurrentLevel` | Brightness with eligible lights | Same light endpoint, readable/writable, advertised percentage range with min 0/1 and max 100 |
 | `ColorControl / ColorXY` | XY color picker on eligible lights | Packed uint32 CIE XY, explicit writable access and safe bounds |
-| `ColorControl / ColorTemperature` | Warm/cool white selector | Mired values within the device-advertised min/max/step |
+| `ColorControl / ColorTemperature` | Warm/cool white selector | Explicitly validated mired or Kelvin API representation, including the M300's 2703–6536 K metadata |
 | `ColorControl / ColorMode` | Current color-mode readback | Read-only mode mapping when reported (XY 1 / color temperature 2) |
 | `Button / ButtonEvent` | Experimental event entity | Documented single/double/long/release types; fresh positive timestamps required |
 
@@ -320,7 +367,7 @@ automations separately. Keep the private REST backup until acceptance is complet
 | Cannot connect | Check reachability from the HA host/container, VLAN/firewall rules, scheme/port and HTTPS certificate trust |
 | Contact/leak remains Unknown | Confirm polarity and inspect boolean `raw_value`; missing or malformed readings intentionally stay unknown |
 | Device has no entities | Check supported function/trait pairs and access flags in sanitized diagnostics |
-| Light only shows Output state | Upgrade to native v0.1.2b1; inspect **Light control status** on the physical device page and redacted eligibility diagnostics |
+| Light only shows on/off or brightness | Verify native v0.1.4b1, inspect `supported_color_modes` under **Tools → States**, and see `light_profiles` in redacted diagnostics |
 | Studio link is missing | Reload the Aqara Studio integration and open the physical device's Visit/Configuration link |
 | Entities unavailable | Check transport and Studio reachability; a cached value alone does not prove current availability |
 | Updates arrive only on polling | Inspect push diagnostics, proxy support for `/open/ws`, and token permissions |

@@ -1,0 +1,10 @@
+{
+  "source": "Anonymized capability metadata from user-supplied Home Assistant 2026.10.4 diagnostics on 2026-11-04; no tokens, device IDs or sensor values",
+  "endpoint": 2,
+  "metadata_unit_redacted": true,
+  "traits": [
+    {"function": "LevelControl", "trait": "CurrentLevel", "type": "Float", "unit": "%", "min": 1, "max": 100, "step": 1, "writable": true, "readable": true},
+    {"function": "ColorControl", "trait": "ColorXY", "type": "Integer", "unit": "", "min": 0, "max": 4294967303, "step": 1, "writable": true, "readable": true},
+    {"function": "ColorControl", "trait": "ColorTemperature", "type": "Integer", "unit": "<redacted>", "min": 2703, "max": 6536, "step": 1, "writable": true, "readable": true}
+  ]
+}

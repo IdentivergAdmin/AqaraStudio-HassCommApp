@@ -1,0 +1,8 @@
+{
+  "installer_app_version": "0.1.5",
+  "native_integration_version": "0.1.4b1",
+  "previous_native_version": "0.1.3b1",
+  "expected_upgrade_log": "UPGRADE 0.1.3b1 -> 0.1.4b1",
+  "diagnostic_fixture": "tests/fixtures/m300_lightstrip_redacted.json",
+  "requires_physical_acceptance": true
+}
