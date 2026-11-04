@@ -1,8 +1,10 @@
 {
-  "installer_app_version": "0.1.5",
+  "distribution": "hacs-marketplace",
+  "integration_domain": "aqara_studio",
   "native_integration_version": "0.1.4b1",
-  "previous_native_version": "0.1.3b1",
-  "expected_upgrade_log": "UPGRADE 0.1.3b1 -> 0.1.4b1",
-  "diagnostic_fixture": "tests/fixtures/m300_lightstrip_redacted.json",
-  "requires_physical_acceptance": true
+  "github_release_tag": "0.1.4b1",
+  "minimum_home_assistant": "2026.10.0",
+  "legacy_installer_branch": "legacy/supervisor-installer-v0.1.5",
+  "requires_core_restart_after_python_update": true,
+  "hardware_acceptance_per_device": true
 }

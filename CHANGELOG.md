@@ -1,5 +1,27 @@
 # Changelog
 
+## Distribution architecture — 2026-11-04 (native 0.1.4b1 unchanged)
+
+- Adopt the conventional **HACS / Home Assistant Marketplace** custom
+  integration distribution model, with one integration and no Supervisor
+  App in the default branch.
+- Retire the one-shot App Installer after preserving its last code in
+  Git branch `legacy/supervisor-installer-v0.1.5`.
+- Make HACS/Marketplace the only update manager, with versioned GitHub
+  pre-releases and standard Home Assistant update entities/notifications.
+- Add automatic, gated beta publication from `main` and enforce
+  one-version release contract. The native runtime `aqara_studio`
+  domain, config entry, API, device IDs and entities remain unchanged.
+- Document in-place migration from App-installed native code without
+  re-pairing, deleting integration config or touching REST/Matter entities.
+- Prepare for the built-in Home Assistant Marketplace in 2026.11;
+  custom repository remains public-link installable pending default
+  catalog submission.
+
+**No change to device operation or color encoding in this distribution
+refactor.**
+
+
 ## 0.1.4b1 — 2026-11-04
 
 **M300 real-diagnostic color compatibility fix.** Addresses writable

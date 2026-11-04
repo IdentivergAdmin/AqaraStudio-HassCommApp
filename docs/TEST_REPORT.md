@@ -1,4 +1,11 @@
-# v0.1.0b1 engineering verification
+# v0.1.0b1 engineering verification — historical snapshot
+
+**Historical only:** this report captures the initial 2026-11-02 beta.
+The current public distribution uses HACS/Marketplace and release-gated
+CI. See [RELEASE_VERIFICATION.md](RELEASE_VERIFICATION.md) for the
+current process; the values below must not be presented as the most
+recent test count, distribution architecture or repo metadata.
+
 
 Recorded 2026-11-02. This report covers automated local verification, not a live
 M300 certification. No private LAN, production Home Assistant, or physical device

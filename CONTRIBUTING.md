@@ -70,23 +70,33 @@ validator containers that can detect evolving ecosystem requirements. Original
 local brand assets satisfy current HACS brand validation without claiming vendor
 endorsement.
 
-## Releases
+## Releases and distribution
 
-1. Pass tests, lint, hassfest and HACS validation for the release commit.
-2. Set the repository's **About** description and at least one relevant topic.
-   HACS validates GitHub metadata as well as committed files. Suggested
-   description: "Independent local Aqara Studio integration for Home Assistant".
-   Suggested topics: `home-assistant`, `hacs`, `aqara`, `aqara-studio`,
-   `custom-integration`. These settings are changed in GitHub's About gear;
-   editing a README cannot supply them.
-3. Review diagnostics and fixtures for private information.
-4. Execute and record relevant physical tests in `docs/ACCEPTANCE.md`.
-5. Update `manifest.json`, `pyproject.toml` and `CHANGELOG.md` together.
-6. Merge reviewed code to the default branch, or publish a release explicitly
-   targeting the reviewed implementation commit.
-7. Mark releases **prerelease/beta** until hardware acceptance is complete.
-8. Confirm HACS installs the intended version, a clean HA setup works, and
-   upgrading preserves identity.
+This repository is **integration-only**. Never reintroduce
+`repository.yaml`, the one-shot `aqara_studio_installer/` App, or a second
+update mechanism on `main`: Home Assistant Marketplace rejects repositories
+containing Home Assistant OS Apps. The retired installer is preserved in the
+`legacy/supervisor-installer-v0.1.5` branch for historical recovery.
 
-Custom-repository installation is independent of a future HACS default catalog
-or Marketplace submission. Claim external listing only after actual acceptance.
+1. Pass the full HA 2026.10.4 tests, lint, hassfest and HACS validation.
+2. Review fixtures, logs and release notes for credentials or private data.
+3. Update `custom_components/aqara_studio/manifest.json`,
+   `pyproject.toml`, `release_contract.json`,
+   `docs/RELEASE_NOTES.md`, and `CHANGELOG.md` together. The GitHub Release
+   **tag must equal the native manifest version**.
+4. Record physical observations separately from synthetic CI tests.
+5. Merge the reviewed PR to `main`. The release workflow reruns the
+   full test and validation gates, then publishes a **GitHub pre-release**
+   tagged with the native version. It never overwrites an existing release.
+   Check the Actions result and Releases page: a green PR alone does not
+   guarantee a public version was published.
+6. HACS/Marketplace observes published compatible versions; users install
+   updates through its UI and restart Home Assistant Core when requested.
+7. For public catalog listing, open a separate submission to `hacs/default`
+   and pass its community review. Custom-repository availability is not
+   default catalog inclusion.
+
+Read [Release Verification](docs/RELEASE_VERIFICATION.md) and
+[legacy migration](docs/MIGRATE_LEGACY_INSTALLER.md) before altering the
+distribution path. Repository description, topics, and issues are already
+present. Do not claim listing or physical compatibility without evidence.

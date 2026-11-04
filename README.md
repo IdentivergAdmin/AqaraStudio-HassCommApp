@@ -1,230 +1,137 @@
 # Aqara Studio for Home Assistant
 
-[![Add Aqara Studio App repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FIdentivergAdmin%2FAqaraStudio-HassCommApp)
-[![Open Aqara Studio integration in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=IdentivergAdmin&repository=AqaraStudio-HassCommApp&category=integration)
-[![Configure Aqara Studio integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=aqara_studio)
+[![Install Aqara Studio with HACS / Marketplace](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=IdentivergAdmin&repository=AqaraStudio-HassCommApp&category=integration)
+[![Configure Aqara Studio](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=aqara_studio)
 
-**Three different actions:** the first adds the **Apps installer repository**; the second opens the **HACS custom integration repository**; the third starts the **native integration's configuration wizard** *after it has been installed and Home Assistant Core restarted*.
+**A native Home Assistant custom integration for the local Aqara Studio Developer API.**
+Discovers devices through Studio, models supported sensor and light capabilities
+as normal Home Assistant entities, and uses local WebSocket push with REST
+reconciliation and polling fallback.
 
-An independent community integration that connects Home Assistant directly to the
-**Aqara Studio local Open API**. It discovers devices and their advertised
-capabilities, creates native Home Assistant devices/entities, and receives local
-state updates without a separate REST YAML sensor for every device.
+**This is a community project, not an official Aqara integration.**
+The device API token stays in Home Assistant's integration config entry. No
+Aqara cloud account, separate runtime container, broker, or Supervisor App
+is necessary.
 
-**This is not an official Aqara product.** It has no Aqara cloud dependency,
-telemetry, external callbacks, or Docker runtime requirement. It does not require
-the M300 to advertise an outward Matter Bridge role.
+## Status
 
-## Beta status
+- **Native integration version:** `0.1.4b1` (beta).
+- **Home Assistant compatibility:** tested against `2026.10.4`, requires
+  `2026.10.0` or newer.
+- **Known working example:** M300-connected ClosetLight supports actual on/off
+  and color control, with `xy` and `color_temp` modes, plus 2703–6536 K
+  temperature bounds. Other device models and sensitive automations require
+  their own physical acceptance checks.
+- **Distribution:** [HACS](https://www.hacs.xyz/) on HA 2026.10 and earlier,
+  **Settings → Marketplace** on HA 2026.11 and newer.
+- **Availability:** this is a **custom repository**. Public availability via
+  this link is not the same as inclusion in the default Marketplace catalog.
 
-Version **0.1.4b1** is a beta update. Automated tests use synthetic fixtures
-derived from the current vendor contract. A successful test suite is not a live
-hub compatibility certification. Physical device acceptance is still required;
-see [the acceptance runbook](docs/ACCEPTANCE.md).
+## Install and updates
 
-**Keep your existing working REST/Matter entities and automations in place while
-you validate the new entities.** This integration never removes another
-integration's entities and never edits Home Assistant's `.storage` files.
+<!-- ha-marketplace:exclude-start -->
 
-### Contact/leak polarity requires confirmation
+### HACS on Home Assistant 2026.10 or earlier
 
-Aqara's current public data model declares `ContactSensorState` and `LeakState` as
-booleans but does not explicitly define which value means open or wet. The beta
-therefore starts these entities as **Unknown** until you confirm their polarity.
-An exposed `raw_value` attribute supports comparison with Studio and a physical
-state change. Missing or unrecognized values never mean closed or dry.
+1. Open HACS in Home Assistant. Select **Custom repositories**.
+2. Add `https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp` with
+   category **Integration**. You can also use the badge above.
+3. Open **Aqara Studio** in HACS, select **Download**, and select the
+   beta/pre-release version if prompted. This project's release may require
+   enabling **Pre-release** in the repository's options.
+4. Follow Home Assistant's restart instruction to load the new Python
+   integration. Under **Settings → Devices & services**, add **Aqara Studio**
+   and complete the config flow.
 
-1. Add the integration and leave the working REST entity enabled. Leave the
-   polarity settings **Unconfirmed** during setup unless you have already
-   verified the actual raw values.
-2. Inspect the new contact entity's `raw_value` under **Tools → States**.
-3. Close and open a test contact, checking both Studio and the working entity.
-4. In the Aqara Studio integration options, set **Contact polarity** to the
-   mapping you actually observed: true means open, or false means open.
-5. Repeat with a safe manufacturer-approved dry/wet test before selecting
-   **Leak polarity**. Leave leak polarity unconfirmed until that test is complete.
+### Marketplace on Home Assistant 2026.11 or newer
 
-Each mapping applies to **all included sensors of that type in the Studio
-entry**. Validate every device, especially mixed models or bridge sources, before
-relying on it. If devices use incompatible encodings, exclude mismatched devices
-or leave that entire type unconfirmed and report sanitized evidence. This beta
-does not provide per-device polarity overrides.
+1. Open **Settings → Marketplace**.
+2. Add the same GitHub URL as a **custom integration repository** if it is
+   not yet in the default catalog. Custom repositories require a GitHub
+   connection.
+3. Download **Aqara Studio**, select its beta version if required, then use
+   **Settings → Devices & services** to configure it. A new config-flow
+   integration may load without a first-install restart; follow the UI.
 
-## Requirements
+### Already installed using the retired Supervisor App?
 
-- Home Assistant **2026.10.0 or newer**. The reproducible automated test target is
-  Home Assistant **2026.10.4** with Python **3.14.2 or newer**.
-- Aqara Studio with the local Developer API enabled and a Developer API token.
-- Network access **from Home Assistant** to the Studio HTTP(S) and WebSocket
-  endpoint. The integration uses `/open/api/v1` and `/open/ws`.
-- Supported capabilities advertised by the actual Studio device definitions.
-  A marketing model name alone is not sufficient to create an entity.
+**Do not remove the Aqara Studio config entry or delete
+`custom_components/aqara_studio`.** The App previously copied this exact
+native integration into the standard location. To make HACS/Marketplace the
+update manager, follow the [legacy App migration runbook](docs/MIGRATE_LEGACY_INSTALLER.md).
+Do not run the legacy one-shot App again after HACS/Marketplace takes ownership.
 
-The token is entered locally in the Home Assistant UI and stored in its config
-entry. Do not put it in this repository, YAML examples, issues, screenshots or
-captures. HTTP sends bearer tokens without encryption; use HTTPS with a trusted
-certificate where supported and restrict network access. TLS verification stays
-enabled for HTTPS. See [SECURITY.md](SECURITY.md).
+<!-- ha-marketplace:exclude-end -->
 
-## Installation
+### How updates work
 
-### Home Assistant OS: one-click Apps installer
+HACS/Marketplace monitors the GitHub repository's published releases and
+creates a Home Assistant **update entity/notification**. When a newer compatible
+release is available, select **Install/Update** in the HACS/Marketplace UI.
+It downloads the integration to `custom_components/aqara_studio`. Then
+**restart Home Assistant Core if requested** to load updated Python code.
+That restart is normal for custom integrations, not something a Supervisor
+App can eliminate.
 
-Use the **Add app repository** badge at the top or add
-`https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp` at **Settings → Apps → Repositories**.
-Install **Aqara Studio Integration Installer (Beta)** from **Apps**, then press
-**Start** once. When the log says the native integration was installed, restart
-**Home Assistant Core** and use the **Configure integration** badge above.
-The one-shot installer stopping is normal. **Do not put your API token in the
-installer**; only enter it in the native Aqara Studio config flow.
+**There is no installer App to start, separate App version, or second
+runtime service.** Aqara Studio's native config entry continues running
+between updates: WebSocket push, REST fallback, inventory reconciliation,
+and Home Assistant entities are managed by Home Assistant Core.
 
-**Upgrades are now one Start, no toggles:** update the **Installer App** to
-**v0.1.5 or later**, then press **Start** once and read its Logs.
-The installer automatically compares native versions: **UPGRADE** makes a backup
-and installs newer code, **ALREADY CURRENT** makes no changes or backups, and
-**DOWNGRADE BLOCKED** refuses an older package. **Restart Home Assistant Core
-only after FIRST INSTALL or UPGRADE reports SUCCESS.** The previous
-`replace_existing` option is gone and any old saved value is ignored.
-
-**Current installed native v0.1.3b1?** Installer App **v0.1.5** upgrades it to
-native **v0.1.4b1** with an automatic backup. The expected log is
-`UPGRADE 0.1.3b1 -> 0.1.4b1` followed by `SUCCESS`.
-Restart **Core only after that successful installer run**. A repeated
-Start reports `ALREADY CURRENT` without changing anything.
-The **App version** and **native integration version** are intentionally
-different; see [Release Verification](docs/RELEASE_VERIFICATION.md).
-See [the simplified upgrade/rollback guide](aqara_studio_installer/DOCS.md).
-
-### HACS custom integration
-
-Use the **Open in HACS** badge above, or enter `https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp` in
-**HACS → Custom repositories** as type **Integration**. Download Aqara Studio,
-restart Home Assistant Core, and use the **Configure integration** badge.
-You only need one installation method. Custom HACS repositories are separate
-from inclusion in the HACS catalog / Home Assistant Marketplace.
-
-### Manual installation
-
-Copy `custom_components/aqara_studio/` from this repository's current
-`main` branch into your HA config directory so that
-`/config/custom_components/aqara_studio/manifest.json` exists. Restart Home
-Assistant Core. For upgrades, back up the previous folder first.
-Keep your existing REST/Matter integrations active until physical acceptance
-has passed.
+For now, GitHub releases are marked **pre-release** because the full
+device family has not been physically certified. Users may need to enable
+pre-release versions in HACS/Marketplace. Release notes describe safety
+and migration changes.
 
 ## Configuration
 
-1. Open **Settings → Devices & services → Add integration**.
-2. Search for **Aqara Studio**.
-3. Enter the Studio hostname, IP address, or HTTP(S) URL, for example
-   `studio.example.local` or `https://studio.example.local`.
-4. Paste the Developer API token into the token field.
-5. Complete the polarity confirmation step, leaving it unconfirmed if you have
-   not validated the physical device's raw values.
-6. Open the integration's devices and inspect its entities.
-7. Complete contact/leak calibration as described above.
+Open **Settings → Devices & services → Add integration → Aqara Studio**.
+Enter the local Studio address (HTTP/HTTPS) and Developer API token into
+Home Assistant's configuration flow—not YAML or a GitHub issue.
 
-No `configuration.yaml` entry is required. Stable gateway IDs from Studio
-identify the config entry; names and addresses are not identity. Duplicate
-gateway identities are rejected. Multiple independent Studio installations can
-be configured. Reconfiguration changes connection details while preserving
-identity. Reauthentication handles credentials rejected by Studio.
+The integration supports multiple independent Studio installations, stable
+gateway/device/endpoint identities, config-entry reconfiguration and token
+reauthentication. There is no `configuration.yaml` entry required.
 
 ### Options
 
-| Option | Default | Effect |
+| Option | Default | What it controls |
 | --- | --- | --- |
-| REST fallback polling interval | 15 seconds | Current-state polling when push is disabled/disconnected; 5–300 seconds |
-| State reconciliation interval | 300 seconds | REST repair of state while push operates; 60–3,600 seconds |
-| Inventory reconciliation interval | 300 seconds | Discover new/changed devices; 60–3,600 seconds |
-| Enable WebSocket | On | Use local push and restore subscriptions after reconnect |
-| Experimental button events | Off | Enable live button event entities and decoding |
-| Enable native light controls | **On** | Create native lights only for confirmed writable Light endpoints; off keeps read-only state |
-| Enable writable switches/outlets (advanced) | Off | Permit explicit switch/outlet endpoints only; no lock/garage/valve control |
-| Excluded devices | None | Skip selected devices without deleting other integrations |
-| Contact polarity | Unconfirmed | Explicit true/open or false/open mapping |
-| Leak polarity | Unconfirmed | Explicit true/wet or false/wet mapping |
+| REST fallback polling | 15 sec | State polling when push is unavailable |
+| State reconciliation | 300 sec | Repair state while push is active |
+| Inventory reconciliation | 300 sec | Discover added or changed devices |
+| WebSocket push | On | Local push updates and reconnects |
+| Experimental live button events | Off | Live button events, never cached presses |
+| Native light controls | **On** | Only positively identified writable lights |
+| Advanced switches/outlets | Off | Non-light actuation must be explicitly enabled |
+| Excluded devices | None | Skip selected devices |
+| Contact polarity | Unconfirmed | Explicit open/closed mapping |
+| Leak polarity | Unconfirmed | Explicit wet/dry mapping |
 
-Light controls are enabled by default only for positively identified writable
-lights. Other controls are off during initial acceptance. An exposed control
-still requires physical testing; missing writable access flags or unsupported
-vendor operations cannot be overridden by options.
+### Device support and safety
 
-## Native lights, color control, and Studio management
+- **Lights:** On/off, brightness and supported XY color or white color
+  temperature; only capabilities the local API actually reports as readable
+  and writable are exposed. M300 strips can report Kelvin metadata rather
+  than mired, and slightly oversized XY metadata; values are validated before
+  writes.
+- **Sensors:** Contacts, leaks, battery, voltage, environmental readings
+  where confirmed traits are available.
+- **Buttons:** Experimental events require fresh live timestamps; cached
+  values do not trigger presses.
+- **No actuation of locks, covers, garage doors or valves.**
 
-A device advertising a writable `Output/OnOff` trait can become a **native
-`light` entity** when its endpoint is classified as a light or advertises
-same-endpoint Lighting/ColorControl functions. A writable `Switch`/`Outlet`
-endpoint can become a native `switch`. Unknown or hazardous endpoints never
-get an actuator based on an OnOff trait alone.
+**Contact and leak polarity is not inferred from a model name.**
+The Studio API does not specify which boolean means open or wet for every
+device. Until you physically verify raw behavior and select the correct
+polarity, the native entity must show Unknown. Keep your existing working
+REST/Matter sensors until each critical device passes testing.
 
-**Native lights are on by default** when Aqara Studio advertises both a
-recognized light device/endpoint and a writable boolean `Output/OnOff` trait.
-They appear as Home Assistant `light` entities, while the previous
-`Output state` sensor is preserved so existing automations are not broken.
+## Home Assistant light controls
 
-For an already-configured installation, use **Settings → Apps → Aqara Studio
-Integration Installer (Beta) → Update to v0.1.5 → Start once**, then restart
-Home Assistant Core after a successful `UPGRADE` log. Open **Settings →
-Devices & services → Aqara Studio → Devices → ClosetLight**. A new native light
-entity should appear. The old `Output state` sensor can remain; do not delete
-it without checking automations.
-
-**Light control status:** the device now also exposes a diagnostic sensor:
-`ready` (API reports a supported writable light), `api_read_only`,
-`unsupported_onoff_type`, or `disabled_in_options`. A `ready` result
-confirms the API definition, **not** a successful physical write.
-
-To disable light controls, open **Aqara Studio → Configure/Options → Enable
-native light controls** and turn it off. **Switches and outlets remain disabled
-by default** and have their own advanced option. The integration still never
-exposes unsupported locks, valves, covers, or garage actuation.
-
-For eligible lighting endpoints:
-
-- Basic on/off is supported where `Output/OnOff` is explicitly writable.
-- Brightness appears only with a compatible writable percentage
-  `LevelControl/CurrentLevel` trait.
-- XY color control uses Aqara's documented packed uint32 CIE XY encoding,
-  only where `ColorControl/ColorXY` is explicitly readable/writable with a
-  verified compatible data type.
-- White color temperature supports **mired or Kelvin API definitions**,
-  identified from the unit and validated bounds. The M300 reports
-  2703–6536 K even though its Zigbee hardware uses mired steps.
-- The optional read-only `ColorControl/ColorMode` value identifies the active
-  XY vs white-temperature presentation where supplied. Invalid values remain
-  unknown, not guessed.
-- Individual LED/pixel or addressable strip **segment control is not
-  implemented**. Reporting a segment count alone does not prove commands for
-  independently addressable segments.
-
-**Open Aqara Studio directly:** under **Settings → Devices & services → Aqara
-Studio → Devices**, open the gateway or any discovered device and select its
-**Visit / Configuration URL** link. The link uses the configured local Studio
-HTTP(S) origin and does not include or expose your API token. It opens in your
-browser; remote users still need network access to the Studio host.
-
-If lights do not appear, download sanitized integration diagnostics and inspect
-`lighting.eligible_lights` and `lighting.enabled_lights`, without posting any
-raw tokens or device identifiers. The device model may advertise functions that
-this release cannot safely control; unsupported traits are intentionally skipped.
-
-### RGB strip controls and proof of capability (Home Assistant 2026.10.4)
-
-On the device page, the **Controls** card shows the on/off switch. Click the
-**ClosetLight entity name**, not the switch, to open the light's more-info
-dialog. Brightness and color selectors appear according to the
-`supported_color_modes` reported by Home Assistant.
-
-Use **Tools → States** to inspect `light.closetlight`. **Do not press
-"Set state" to test hardware**: it only edits Home Assistant's state
-representation and never commands Aqara Studio. When a light is **Off**,
-`brightness: null` and `color_mode: null` can be normal. Also,
-`supported_features: 0` is normal for a light with no extra effects,
-flash or transition features. Brightness and color are advertised using
-`supported_color_modes`, **not** `supported_features`.
-
-**Expected on native v0.1.4b1 for the verified M300 ClosetLight:**
+The device page's Controls card often shows only the on/off switch. Click
+the **light entity name**, not the switch, to open the full light dialog.
+For example, M300 ClosetLight exposes these attributes:
 
 ```yaml
 supported_color_modes:
@@ -234,25 +141,15 @@ min_color_temp_kelvin: 2703
 max_color_temp_kelvin: 6536
 ```
 
-The exact order of `xy` and `color_temp` is irrelevant. These modes
-also support brightness; Home Assistant does not add `brightness` as a
-separate supported mode alongside color modes.
+The order of the modes is irrelevant; brightness control is implicit in
+color-capable light modes. A light that is Off can correctly report
+`color_mode: null`, `brightness: null` and `xy_color: null`.
+`supported_features: 0` is normal if extra effects/flash/transition
+features are not implemented.
 
-**Why previous versions failed:** The anonymized production diagnostics
-showed a writable `ColorXY` descriptor with `max=4294967303` (eight
-above a strict uint32 maximum) and a writable
-`ColorTemperature` descriptor with `min=2703, max=6536`,
-representing Kelvin rather than the generic published mired range.
-Earlier code rejected both. The new decoder accepts the narrowly
-observed descriptor exception, but still writes XY values only within
-`0..4294967295`. It also converts and validates mired vs Kelvin
-**according to the device representation** rather than sending a mired
-value when the device expects Kelvin.
-
-After the native version is installed and Core restarted, use
-**Tools → Actions → light.turn_on**, targeting `light.closetlight`,
-for a controlled physical test. Begin with 50% brightness; then
-4000 K color temperature; then an XY color. Example Actions data:
+Inspect state under **Tools → States**. **Set state** modifies the Home
+Assistant representation only; it does not command the physical device.
+For a physical test use **Tools → Actions** and `light.turn_on`:
 
 ```yaml
 action: light.turn_on
@@ -262,179 +159,35 @@ data:
   brightness_pct: 50
 ```
 
-```yaml
-action: light.turn_on
-target:
-  entity_id: light.closetlight
-data:
-  color_temp_kelvin: 4000
-```
-
-Do not claim a successful physical action from the presence of UI controls.
-Verify the actual LED strip changes and Studio readback matches.
-
-For further diagnosis, download **Aqara Studio → menu → Download
-diagnostics**. The sanitized export includes
-`devices[].light_features`, `devices[].light_profiles` and
-`devices[].light_trait_metadata`. The report omits API tokens, raw
-color values and household device identifiers.
-
-The native `enable_light_controls` option is already enabled when
-checked. If its label is displayed literally after an upgrade,
-hard-refresh the browser (**Ctrl+Shift+R**); the source translation
-contains **Enable native light controls**. It does not configure
-individual color modes.
-
-## Supported capabilities
-
-The registry matches exact function/trait pairs and appropriate access metadata.
-All listed device behavior still requires physical acceptance on your firmware.
-Unsupported traits are skipped and summarized in diagnostics instead of creating
-hundreds of unnecessary entities.
-
-| Aqara function / trait | Home Assistant behavior | Qualification |
-| --- | --- | --- |
-| `Contact / ContactSensorState` | Door contact binary sensor | Polarity must be confirmed; invalid/missing remains unknown |
-| `WaterLeak / LeakState` | Moisture binary sensor | Wet/dry polarity must be confirmed |
-| `BasicInformation / Reachable` | Device availability evidence | Missing reachability is not a fabricated online/offline value |
-| `Temperature / CurrentTemperature` | Temperature sensor | Verified numeric/unit mapping |
-| `RelativeHumidity / CurrentHumidity` | Humidity sensor | Percent with numeric validation |
-| `PowerSource / BatPercentRemaining` | Battery sensor | Percent with numeric validation; out-of-range/sentinel values remain unknown |
-| `PowerSource / CurrentVoltage` | Voltage sensor | Volts, or advertised mV converted to V; diagnostic disabled by default |
-| `Illuminance / CurrentIlluminance` | Illuminance sensor | Lux with numeric validation |
-| `Output / OnOff` | Read-only power state; opt-in controls | Exact endpoint type `Light`, `Switch` or `Outlet` and writable access required for controls |
-| `LevelControl / CurrentLevel` | Brightness with eligible lights | Same light endpoint, readable/writable, advertised percentage range with min 0/1 and max 100 |
-| `ColorControl / ColorXY` | XY color picker on eligible lights | Packed uint32 CIE XY, explicit writable access and safe bounds |
-| `ColorControl / ColorTemperature` | Warm/cool white selector | Explicitly validated mired or Kelvin API representation, including the M300's 2703–6536 K metadata |
-| `ColorControl / ColorMode` | Current color-mode readback | Read-only mode mapping when reported (XY 1 / color temperature 2) |
-| `Button / ButtonEvent` | Experimental event entity | Documented single/double/long/release types; fresh positive timestamps required |
-
-No lock/unlock, garage actuation, commissioning, unbinding, arbitrary commands or
-destructive Studio operations are exposed. Cover controls, occupancy/motion
-mappings and unverified manufacturer-specific capabilities are outside this beta.
-Occupancy is deferred until its value semantics are evidenced explicitly.
-
-## Updates, availability, and identity
-
-REST supplies initial inventory, definitions and current values. WebSocket
-authenticates, subscribes, maintains a heartbeat and restores subscriptions after
-reconnecting. REST reconciliation repairs gaps after disconnections. If push is
-unavailable, the configured polling fallback continues.
-
-Definitions are cached for up to six hours. Normal polling reads traits in
-batches; it does not download every definition every 15 seconds. Inventory
-reconciliation and debounced object events discover newly paired devices without
-YAML edits or an HA restart. Missing inventory records never automatically delete
-registry records.
-
-| Condition | Expected Home Assistant result |
-| --- | --- |
-| Valid value, confirmed polarity, available transport/device | Open/closed, wet/dry or numeric state |
-| Missing/unrecognized value or unconfirmed polarity | Unknown; no fabricated safe value |
-| Confirmed `Reachable = false` | Unavailable |
-| Transport failure without fresh state confirmation | Unavailable until successful reconciliation |
-| Sleeping battery device with no recent change | Not offline solely because it is quiet |
-
-Entity unique IDs use stable gateway, device, endpoint, function and trait IDs.
-Renaming a device or moving it between Studio spaces does not change identity.
-HA preserves its entity ID and user-customized name through ordinary rediscovery.
-A reset that changes physical identifiers may require migration.
-
-An event entity's presence does not prove a button works. Press it and inspect a
-newly received live event. A button report must carry a **positive vendor
-timestamp strictly newer than the cached value or reconnect snapshot** before it
-can drive an automation. Reports with missing or zero timestamps remain
-diagnostic observations and never generate button presses. Firmware/bridges
-without reliable event timestamps therefore have no usable button automation in
-this beta. Startup and polling never replay cached button values. This event
-freshness rule is separate from ordinary sensor values, where timestamp zero
-alone does not invalidate a reading.
-
-## Migration
-
-Follow [MIGRATION.md](MIGRATION.md) before renaming or removing anything. Run the
-integration alongside the working REST sensor, compare both physical states and
-offline behavior, then release and reuse the old entity ID. Reusing an entity ID
-does **not** preserve the old internal `device_id`; repair and test device-based
-automations separately. Keep the private REST backup until acceptance is complete.
+Physically verify light changes and Studio readback before relying on
+automations. Do not copy a device ID or API token into public issues.
 
 ## Troubleshooting
 
-| Symptom | Checks |
+| Symptom | Where to start |
 | --- | --- |
-| Aqara Studio absent from Add integration | Check exact folder path, restart HA, refresh browser, inspect log for import/manifest errors |
-| Invalid authentication | Verify Developer API access/token and expiration/revocation; reauthenticate |
-| Cannot connect | Check reachability from the HA host/container, VLAN/firewall rules, scheme/port and HTTPS certificate trust |
-| Contact/leak remains Unknown | Confirm polarity and inspect boolean `raw_value`; missing or malformed readings intentionally stay unknown |
-| Device has no entities | Check supported function/trait pairs and access flags in sanitized diagnostics |
-| Light only shows on/off or brightness | Verify native v0.1.4b1, inspect `supported_color_modes` under **Tools → States**, and see `light_profiles` in redacted diagnostics |
-| Studio link is missing | Reload the Aqara Studio integration and open the physical device's Visit/Configuration link |
-| Entities unavailable | Check transport and Studio reachability; a cached value alone does not prove current availability |
-| Updates arrive only on polling | Inspect push diagnostics, proxy support for `/open/ws`, and token permissions |
-| Button has no events | Enable experimental events and confirm live vendor events arrive when pressed |
-| New device has not appeared | Allow an inventory cycle; confirm Studio lists it and it is not excluded |
-| Automation fails after migration | Check both `entity_id` and internal `device_id`; inspect automation traces |
+| HACS/Marketplace cannot find the repository | Add it as **custom Integration**, not as an App repository |
+| Light only shows On/Off | Open the light name; inspect `supported_color_modes` in **Tools → States** |
+| A writable capability is missing | Download **sanitized diagnostics** from Aqara Studio integration and inspect `light_features` and `light_profiles` |
+| Contact reads Unknown | Physically confirm raw polarity in Studio, then set the matching integration option |
+| State updates stop | Inspect `push_connected`, REST fallback and device `reachable` in sanitized diagnostics |
+| Update was downloaded but code looks old | Verify manifest version in **Devices & services** and restart **Core** if required |
+| HACS says the integration already exists | **Stop before deleting files or the config entry**; follow the [legacy migration guide](docs/MIGRATE_LEGACY_INSTALLER.md) |
 
-Download diagnostics from the integration entry's menu under **Settings →
-Devices & services**. The export contains selected redacted metadata, not whole
-API payloads or credentials. Review attachments before posting them publicly.
-Model codes, function/trait names and versions are useful; personal identifiers,
-room names and network details are not.
+The integration never modifies unrelated Matter/REST integrations or
+Home Assistant's `.storage` files.
 
-To remove the integration, first migrate/disable dependent automations, remove
-the Aqara Studio config entry, then uninstall through HACS or remove its custom
-component folder and restart HA. This does not unpair devices from Studio or
-remove separate REST/Matter integrations.
+## Maintenance and participation
 
-## Development and verification
+- [Architecture and local API notes](docs/PROTOCOL.md)
+- [Physical device acceptance checklist](docs/ACCEPTANCE.md)
+- [Migration from the old one-shot App](docs/MIGRATE_LEGACY_INSTALLER.md)
+- [How releases, checks and updates work](docs/RELEASE_VERIFICATION.md)
+- [Migrating existing REST/Matter automations](MIGRATION.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security and private reporting](SECURITY.md)
+- [Changelog](CHANGELOG.md)
 
-See the [executed verification report and exact file inventory](docs/TEST_REPORT.md)
-for the initial beta results and remaining hardware/publication gates.
-
-```sh
-python3.14 -m venv .venv
-. .venv/bin/activate
-python -m pip install -r requirements_test.txt
-python -m ruff check .
-python -m ruff format --check .
-python -m pytest -q --cov=custom_components.aqara_studio --cov-report=term-missing
-```
-
-CI runs those checks plus official HACS and hassfest validation. Dependencies and
-action revisions are pinned. The official validator actions track upstream
-validation containers, so future requirements can change. See
-[CONTRIBUTING.md](CONTRIBUTING.md).
-
-The manifest's `local_push` classification describes the implemented local
-WebSocket primary transport, with REST fallback. It does not claim every device
-or firmware has passed live tests.
-
-## References
-
-- [Aqara local API introduction](https://docs.aqara.com/docs/aqara-developer/data-export-api/introduction/)
-- [Aqara device API](https://docs.aqara.com/docs/aqara-developer/data-export-api/device/)
-- [Aqara WebSocket API](https://docs.aqara.com/docs/aqara-developer/data-export-api/websocket-api/)
-- [Verified protocol and source discrepancies](docs/PROTOCOL.md)
-- [Home Assistant manifest](https://contributors.home-assistant.io/core/integrations/manifest/)
-- [Home Assistant config flows](https://contributors.home-assistant.io/core/integrations/config-flow/)
-- [HACS integration packaging](https://www.hacs.dev/docs/publish/integration/)
-- [HACS validation action](https://www.hacs.dev/docs/publish/action/)
-
-Code and original community icon assets use the [MIT license](LICENSE). Aqara and
-Home Assistant names remain the property of their respective owners.
-
-## Install from Home Assistant's Apps repository screen
-
-**This is a native custom integration, not an always-running App.** For Home Assistant OS/Supervisor users who are already at **Settings > Apps > Repositories**, this repository also includes a small **Aqara Studio Integration Installer (Beta)** App.
-
-1. Add https://github.com/IdentivergAdmin/AqaraStudio-HassCommApp to the Apps repository manager.
-2. Find **Aqara Studio Integration Installer (Beta)** under **Settings > Apps > Install app**.
-3. Install it, leave the default **replace_existing = false**, and press **Start** once.
-4. Read its Logs; **Stopped** after a successful copy is normal for this one-shot installer.
-5. Restart **Home Assistant Core**, then add **Aqara Studio** under **Settings > Devices & services**.
-6. Enter your local Studio host and Developer API token in the native integration setup, **not** in the installer.
-
-The installer carries a frozen copy of the exact integration source in its Docker build context, and has no runtime GitHub download or background process. It writes only the native custom_components/aqara_studio folder and, on explicitly requested upgrades, saves the previous folder in aqara_studio_installer_backups/. No existing REST or Matter entities are removed. See the [App installation and security guide](aqara_studio_installer/DOCS.md).
-
-The alternative **HACS custom repository** workflow continues to work for users who prefer HACS (HACS is separate from the Apps repository manager). Both methods install the same native integration. Do not install it with both package managers at the same time.
-
+Development requires Python 3.14, the pinned Home Assistant test harness,
+Ruff, hassfest, HACS validation and sanitized fixture coverage. A
+passing CI build does not certify every device on real hardware.
