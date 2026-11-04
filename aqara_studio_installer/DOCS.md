@@ -1,6 +1,6 @@
 # Aqara Studio Integration Installer (Beta)
 
-**Version 0.1.4 — improved light capability detection and no upgrade toggles.** This is a small, one-shot Home Assistant App that installs or upgrades the **native** Aqara Studio custom integration. It is not a second integration, proxy, Matter bridge, or background service.
+**Installer App 0.1.5 (bundled native 0.1.4b1) — corrected M300 color metadata and no upgrade toggles.** This is a small, one-shot Home Assistant App that installs or upgrades the **native** Aqara Studio custom integration. It is not a second integration, proxy, Matter bridge, or background service.
 
 ## Install for the first time
 
@@ -12,7 +12,7 @@
 
 ## Upgrade an existing installation
 
-**Update the Installer App to 0.1.4 or newer in Settings → Apps, then press Start once. That's it.** There is no Configuration toggle, saved confirmation, delete/reinstall, token entry, or re-pairing step.
+**Update the Installer App to 0.1.5 or newer in Settings → Apps, then press Start once. That's it.** There is no Configuration toggle, saved confirmation, delete/reinstall, token entry, or re-pairing step.
 
 The installer checks the version in `custom_components/aqara_studio/manifest.json` against its bundled native integration and reports one of four results:
 
@@ -23,7 +23,14 @@ The installer checks the version in `custom_components/aqara_studio/manifest.jso
 | `ALREADY CURRENT` | Exact same native version | **Nothing to do**; Core restart not needed |
 | `DOWNGRADE BLOCKED` | Installed native version is newer than the App's bundled version | Update the Installer App; no files changed |
 
-**Existing users:** If you have native **0.1.2b1**, Installer App **0.1.4** upgrades it to **native 0.1.3b1** with a backup. Restart Home Assistant Core afterward. The installer and native integration have separate version numbers.
+**Existing users:** Native **0.1.3b1** with Installer App **0.1.5**
+should log `UPGRADE 0.1.3b1 -> 0.1.4b1` and `SUCCESS`, moving
+the previous folder to a backup automatically. Restart **Home Assistant
+Core once after SUCCESS**. The App version **0.1.5** and the native
+version **0.1.4b1** are intentionally different. Confirm native
+v0.1.4b1 under **Settings → Devices & services → Aqara Studio** after
+Core has loaded it; updating or running the App alone does not reload
+Home Assistant Python code.
 
 ## Data safety and recovery
 
@@ -43,6 +50,20 @@ Since version 0.1.2, the one-shot App uses a minimal Alpine image instead of an 
 
 ## Validation boundary
 
-The bundled integration is **v0.1.3b1 beta**, with physical M300 acceptance outstanding. Keep working contact/leak REST sensors until you have confirmed raw contact/leak polarity and transport recovery. Native lights are now enabled by default only for positively identified Light devices with writable OnOff traits. Other switches/outlets remain opt-in. After upgrading, open ClosetLight in Devices & services: look for a native light entity and a diagnostic **Light control status**. The status shows `ready`, `api_read_only`, `unsupported_onoff_type`, or `disabled_in_options`. The status `ready` confirms capability detection, not physical write acceptance.
+The bundled integration is **v0.1.4b1 beta**, with physical M300 acceptance outstanding. Keep working contact/leak REST sensors until you have confirmed raw contact/leak polarity and transport recovery. Native lights are now enabled by default only for positively identified Light devices with writable OnOff traits. Other switches/outlets remain opt-in. After upgrading, open ClosetLight in Devices & services: look for a native light entity and a diagnostic **Light control status**. The status shows `ready`, `api_read_only`, `unsupported_onoff_type`, or `disabled_in_options`. The status `ready` confirms capability detection, not physical write acceptance.
 
 **HACS is another supported installation method.** Use either HACS **or** this one-shot installer to manage the native files, not both at once.
+
+## Verification before changing your live Home Assistant installation
+
+The GitHub release gates validate the native manifest, packaged
+snapshot, App metadata, M300 diagnostic fixture, color-command
+authorization, lint, hassfest, HACS and Docker installer smoke tests.
+See [the release contract](../docs/RELEASE_VERIFICATION.md).
+
+**Do not upgrade just because a commit was pushed to a feature branch.**
+Use a tested, merged `main` revision. The App installed in Home
+Assistant must display **0.1.5**, and its bundled native manifest
+must be **0.1.4b1**. A **successful installer log means code was copied,
+not that Core reloaded it**. Only a subsequent Core restart activates
+the new native code.

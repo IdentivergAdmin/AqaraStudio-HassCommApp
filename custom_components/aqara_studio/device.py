@@ -399,19 +399,67 @@ def _integer_trait(device: StudioDevice, primary: Trait, code: str) -> Trait | N
         or not trait.readable
         or not trait.writable
         or trait.parameter.get("type") not in {"Integer", "UInt32", "Uint32", "uint32"}
-        or trait.parameter.get("unit") not in (None, "", "mired", "mireds")
     ):
         return None
     return trait
 
 
-def color_temp_trait(device: StudioDevice, primary: Trait) -> Trait | None:
-    """Color temperature must advertise hardware mired bounds; never assume."""
-    trait = _integer_trait(device, primary, "ColorTemperature")
-    if trait is None:
+@dataclass(frozen=True)
+class ColorTemperatureProfile:
+    """Validated device-level color temperature representation."""
+
+    unit: str
+    minimum: int
+    maximum: int
+    step: int
+
+    @property
+    def min_kelvin(self) -> int:
+        return (
+            math.ceil(1_000_000 / self.maximum)
+            if self.unit == "mired"
+            else self.minimum
+        )
+
+    @property
+    def max_kelvin(self) -> int:
+        return (
+            math.floor(1_000_000 / self.minimum)
+            if self.unit == "mired"
+            else self.maximum
+        )
+
+    def to_kelvin(self, raw: Any) -> int | None:
+        value = finite_number(raw)
+        if value is None or not self.minimum <= value <= self.maximum:
+            return None
+        return round(1_000_000 / value) if self.unit == "mired" else round(value)
+
+    def from_kelvin(self, kelvin: int) -> int | None:
+        """Encode a HA Kelvin request in the device's advertised raw units."""
+        if type(kelvin) is not int or not self.min_kelvin <= kelvin <= self.max_kelvin:
+            return None
+        raw = 1_000_000 / kelvin if self.unit == "mired" else kelvin
+        quantized = self.minimum + round((raw - self.minimum) / self.step) * self.step
+        return max(self.minimum, min(self.maximum, quantized))
+
+    def accepts_raw(self, value: Any) -> bool:
+        return (
+            type(value) is int
+            and self.minimum <= value <= self.maximum
+            and (value - self.minimum) % self.step == 0
+        )
+
+
+def color_temperature_profile(trait: Trait) -> ColorTemperatureProfile | None:
+    """Identify the API's mired or Kelvin representation, never cross-write.
+
+    Aqara specifies mired for its core trait but the M300 LED-strip Studio
+    definition reports the Kelvin-derived bounds 2703..6536. The corresponding
+    Zigbee hardware bounds are 370..153 mired. Both forms must be supported.
+    """
+    if trait.parameter.get("type") not in {"Integer", "UInt32", "Uint32", "uint32"}:
         return None
-    # Aqara ColorTemperature is specified in mired, with default bounds
-    # 153..500 and step=1; these device metadata fields are optional.
     minimum = numeric_parameter(trait, "min", 153)
     maximum = numeric_parameter(trait, "max", 500)
     step = numeric_parameter(trait, "step", 1)
@@ -423,10 +471,39 @@ def color_temp_trait(device: StudioDevice, primary: Trait) -> Trait | None:
         or not maximum.is_integer()
         or not step.is_integer()
         or not 1 <= step <= maximum - minimum
-        or not 100 <= minimum < maximum <= 1000
     ):
         return None
-    return trait
+
+    raw_unit = trait.parameter.get("unit")
+    if raw_unit is not None and not isinstance(raw_unit, str):
+        return None
+    unit = (raw_unit or "").strip().casefold()
+    mired_aliases = {"", "mired", "mireds", "mirek"}
+    kelvin_aliases = {"", "k", "°k", "kelvin", "kelvins", "deg k", "degrees kelvin"}
+
+    if 100 <= minimum < maximum <= 1000 and unit in mired_aliases:
+        return ColorTemperatureProfile("mired", int(minimum), int(maximum), int(step))
+    if 1800 <= minimum < maximum <= 10000 and unit in kelvin_aliases:
+        return ColorTemperatureProfile("kelvin", int(minimum), int(maximum), int(step))
+
+    # This exact metadata profile was observed on a real M300 LED strip.
+    # Studio displays those bounds as Kelvin, but its supplied unit string
+    # is redacted by our diagnostics. Restrict fallback to this exact shape,
+    # excluding explicitly contradictory mired/Celsius/Fahrenheit units.
+    if (
+        minimum == 2703
+        and maximum == 6536
+        and step == 1
+        and unit not in {"mired", "mireds", "mirek", "c", "°c", "celsius", "f", "°f"}
+    ):
+        return ColorTemperatureProfile("kelvin", 2703, 6536, 1)
+    return None
+
+
+def color_temp_trait(device: StudioDevice, primary: Trait) -> Trait | None:
+    """Select a writable, unit-validated white-temperature light trait."""
+    trait = _integer_trait(device, primary, "ColorTemperature")
+    return trait if trait and color_temperature_profile(trait) else None
 
 
 def xy_color_trait(device: StudioDevice, primary: Trait) -> Trait | None:
@@ -439,7 +516,10 @@ def xy_color_trait(device: StudioDevice, primary: Trait) -> Trait | None:
     minimum = numeric_parameter(trait, "min", 0)
     maximum = numeric_parameter(trait, "max", 4294967295)
     step = numeric_parameter(trait, "step", 1)
-    if minimum != 0 or maximum != 4294967295 or step != 1:
+    # The M300's metadata incorrectly advertises 2^32+7, while ColorXY
+    # itself is a uint32. Accept only that narrow descriptor overshoot;
+    # outgoing commands remain strictly limited to 0..0xffffffff.
+    if minimum != 0 or not 4294967295 <= maximum <= 4294967303 or step != 1:
         return None
     return trait
 

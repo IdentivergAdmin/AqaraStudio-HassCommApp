@@ -8,7 +8,12 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.core import HomeAssistant
 
 from .const import CONF_EXCLUDED_DEVICES, DEFAULT_OPTIONS
-from .device import discover_capabilities, finite_number, light_control_status
+from .device import (
+    color_temperature_profile,
+    discover_capabilities,
+    finite_number,
+    light_control_status,
+)
 
 if TYPE_CHECKING:
     from . import AqaraStudioConfigEntry
@@ -59,6 +64,32 @@ async def async_get_config_entry_diagnostics(
                     for cap in eligible
                     if cap.platform == "light"
                 ],
+                "light_profiles": [
+                    {
+                        "endpoint": cap.key.endpoint_id,
+                        "color_temperature_encoding": (
+                            profile.unit
+                            if (
+                                cap.color_temp_key
+                                and (
+                                    profile := color_temperature_profile(
+                                        device.traits[cap.color_temp_key]
+                                    )
+                                )
+                            )
+                            else None
+                        ),
+                        "xy_max_capped_to_uint32": bool(
+                            cap.xy_color_key
+                            and finite_number(
+                                device.traits[cap.xy_color_key].parameter.get("max")
+                            )
+                            == 4294967303
+                        ),
+                    }
+                    for cap in eligible
+                    if cap.platform == "light"
+                ],
                 "light_trait_metadata": [
                     {
                         "endpoint": key.endpoint_id,
@@ -76,6 +107,15 @@ async def async_get_config_entry_diagnostics(
                                 "percentage",
                                 "mired",
                                 "mireds",
+                                "mirek",
+                                "K",
+                                "k",
+                                "°K",
+                                "°k",
+                                "kelvin",
+                                "Kelvin",
+                                "kelvins",
+                                "Kelvins",
                             )
                             else "<redacted>"
                         ),

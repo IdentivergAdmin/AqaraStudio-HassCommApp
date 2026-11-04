@@ -19,6 +19,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .device import (
     Capability,
+    color_temperature_profile,
     discover_capabilities,
     finite_number,
     numeric_parameter,
@@ -61,7 +62,11 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
                 ColorMode.BRIGHTNESS if capability.brightness_key else ColorMode.ONOFF
             )
         self._attr_supported_color_modes = modes
-        self._attr_color_mode = next(iter(modes))
+        # Set a deterministic fallback when the device lacks ColorMode.
+        # A confirmed user color change updates this value in async_turn_on.
+        self._attr_color_mode = (
+            ColorMode.COLOR_TEMP if ColorMode.COLOR_TEMP in modes else sorted(modes)[0]
+        )
 
     @property
     def is_on(self) -> bool | None:
@@ -98,18 +103,14 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
     @property
     def min_color_temp_kelvin(self) -> int | None:
         trait = self._color_trait(self.capability.color_temp_key)
-        if trait is None:
-            return None
-        maximum = numeric_parameter(trait, "max", 500)
-        return math.ceil(1000000 / maximum) if maximum else None
+        profile = color_temperature_profile(trait) if trait else None
+        return profile.min_kelvin if profile else None
 
     @property
     def max_color_temp_kelvin(self) -> int | None:
         trait = self._color_trait(self.capability.color_temp_key)
-        if trait is None:
-            return None
-        minimum = numeric_parameter(trait, "min", 153)
-        return math.floor(1000000 / minimum) if minimum else None
+        profile = color_temperature_profile(trait) if trait else None
+        return profile.max_kelvin if profile else None
 
     @property
     def color_temp_kelvin(self) -> int | None:
@@ -117,18 +118,8 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
         if key is None or not self.coordinator.entity_available(key):
             return None
         trait = self._color_trait(key)
-        value = finite_number(trait.value) if trait else None
-        minimum = numeric_parameter(trait, "min", 153) if trait else None
-        maximum = numeric_parameter(trait, "max", 500) if trait else None
-        if (
-            value is None
-            or minimum is None
-            or maximum is None
-            or not minimum <= value <= maximum
-            or value <= 0
-        ):
-            return None
-        return round(1000000 / value)
+        profile = color_temperature_profile(trait) if trait else None
+        return profile.to_kelvin(trait.value) if profile and trait else None
 
     @property
     def xy_color(self) -> tuple[float, float] | None:
@@ -216,20 +207,11 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
                 raise HomeAssistantError(
                     "This light does not support that color temperature"
                 )
-            mired = round(1000000 / kelvin)
-            minimum = numeric_parameter(trait, "min", 153)
-            maximum = numeric_parameter(trait, "max", 500)
-            step = numeric_parameter(trait, "step", 1)
-            if (
-                minimum is None
-                or maximum is None
-                or step is None
-                or not minimum <= mired <= maximum
-            ):
+            profile = color_temperature_profile(trait)
+            raw_value = profile.from_kelvin(kelvin) if profile else None
+            if raw_value is None:
                 raise HomeAssistantError("Color temperature outside advertised range")
-            mired = int(minimum + round((mired - minimum) / step) * step)
-            mired = min(int(maximum), max(int(minimum), mired))
-            color_write = (key, mired)
+            color_write = (key, raw_value)
             selected_mode = ColorMode.COLOR_TEMP
         elif ATTR_XY_COLOR in kwargs:
             key = self.capability.xy_color_key

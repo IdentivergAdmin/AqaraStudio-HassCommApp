@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.5 — 2026-11-04
+
+- Bundle **native Aqara Studio v0.1.4b1**, correcting the exact real
+  M300 color XY and Kelvin-vs-mired metadata compatibility issue.
+- Preserve version-aware upgrade, automatic backup and rollback.
+- Document both version numbers and the expected
+  `UPGRADE 0.1.3b1 -> 0.1.4b1` log.
+
+
 ## 0.1.4 — 2026-11-04
 
 - Bundle native Aqara Studio v0.1.3b1, improving detection of optional
