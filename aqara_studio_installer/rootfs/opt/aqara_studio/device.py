@@ -299,6 +299,16 @@ def _sensor_unit(trait: Trait, default: str) -> tuple[str, float] | None:
     return None
 
 
+def numeric_parameter(trait: Trait, key: str, default: float) -> float | None:
+    """Use Aqara-spec defaults only for omitted optional numeric metadata.
+
+    A malformed explicit value still rejects the capability. None means that
+    Studio omitted the optional field; it is not a device range assertion.
+    """
+    raw = trait.parameter.get(key)
+    return float(default) if raw is None else finite_number(raw)
+
+
 def brightness_trait(device: StudioDevice, primary: Trait) -> Trait | None:
     """Select percentage brightness only on the same advertised light endpoint."""
     key = TraitKey(
@@ -312,11 +322,13 @@ def brightness_trait(device: StudioDevice, primary: Trait) -> Trait | None:
         or trait.parameter.get("type") not in {"Float", "Integer"}
     ):
         return None
-    minimum = finite_number(trait.parameter.get("min"))
-    maximum = finite_number(trait.parameter.get("max"))
+    # CurrentLevel is percentage-based. Aqara's min=1, max=100 and step=1
+    # metadata are optional; explicit incompatible ranges remain rejected.
+    minimum = numeric_parameter(trait, "min", 1)
+    maximum = numeric_parameter(trait, "max", 100)
     if minimum not in (0.0, 1.0) or maximum != 100.0:
         return None
-    step = finite_number(trait.parameter.get("step"))
+    step = numeric_parameter(trait, "step", 1)
     if step is not None and not 0 < step <= 100:
         return None
     if (
@@ -398,9 +410,11 @@ def color_temp_trait(device: StudioDevice, primary: Trait) -> Trait | None:
     trait = _integer_trait(device, primary, "ColorTemperature")
     if trait is None:
         return None
-    minimum = finite_number(trait.parameter.get("min"))
-    maximum = finite_number(trait.parameter.get("max"))
-    step = finite_number(trait.parameter.get("step", 1))
+    # Aqara ColorTemperature is specified in mired, with default bounds
+    # 153..500 and step=1; these device metadata fields are optional.
+    minimum = numeric_parameter(trait, "min", 153)
+    maximum = numeric_parameter(trait, "max", 500)
+    step = numeric_parameter(trait, "step", 1)
     if (
         minimum is None
         or maximum is None
@@ -422,9 +436,9 @@ def xy_color_trait(device: StudioDevice, primary: Trait) -> Trait | None:
         return None
     if trait.parameter.get("unit") not in (None, ""):
         return None
-    minimum = finite_number(trait.parameter.get("min", 0))
-    maximum = finite_number(trait.parameter.get("max", 4294967295))
-    step = finite_number(trait.parameter.get("step", 1))
+    minimum = numeric_parameter(trait, "min", 0)
+    maximum = numeric_parameter(trait, "max", 4294967295)
+    step = numeric_parameter(trait, "step", 1)
     if minimum != 0 or maximum != 4294967295 or step != 1:
         return None
     return trait

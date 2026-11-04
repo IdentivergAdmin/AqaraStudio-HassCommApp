@@ -1,6 +1,6 @@
 # Aqara Studio Integration Installer (Beta)
 
-**Version 0.1.3 — automatic native light fix and no upgrade toggles.** This is a small, one-shot Home Assistant App that installs or upgrades the **native** Aqara Studio custom integration. It is not a second integration, proxy, Matter bridge, or background service.
+**Version 0.1.4 — improved light capability detection and no upgrade toggles.** This is a small, one-shot Home Assistant App that installs or upgrades the **native** Aqara Studio custom integration. It is not a second integration, proxy, Matter bridge, or background service.
 
 ## Install for the first time
 
@@ -12,7 +12,7 @@
 
 ## Upgrade an existing installation
 
-**Update the Installer App to 0.1.3 or newer in Settings → Apps, then press Start once. That's it.** There is no Configuration toggle, saved confirmation, delete/reinstall, token entry, or re-pairing step.
+**Update the Installer App to 0.1.4 or newer in Settings → Apps, then press Start once. That's it.** There is no Configuration toggle, saved confirmation, delete/reinstall, token entry, or re-pairing step.
 
 The installer checks the version in `custom_components/aqara_studio/manifest.json` against its bundled native integration and reports one of four results:
 
@@ -23,7 +23,7 @@ The installer checks the version in `custom_components/aqara_studio/manifest.jso
 | `ALREADY CURRENT` | Exact same native version | **Nothing to do**; Core restart not needed |
 | `DOWNGRADE BLOCKED` | Installed native version is newer than the App's bundled version | Update the Installer App; no files changed |
 
-**Existing users:** If you have native **0.1.1b1**, Installer App **0.1.3** upgrades it to **native 0.1.2b1** with a backup. Restart Home Assistant Core afterward. The installer and native integration have separate version numbers.
+**Existing users:** If you have native **0.1.2b1**, Installer App **0.1.4** upgrades it to **native 0.1.3b1** with a backup. Restart Home Assistant Core afterward. The installer and native integration have separate version numbers.
 
 ## Data safety and recovery
 
@@ -43,6 +43,6 @@ Since version 0.1.2, the one-shot App uses a minimal Alpine image instead of an 
 
 ## Validation boundary
 
-The bundled integration is **v0.1.2b1 beta**, with physical M300 acceptance outstanding. Keep working contact/leak REST sensors until you have confirmed raw contact/leak polarity and transport recovery. Native lights are now enabled by default only for positively identified Light devices with writable OnOff traits. Other switches/outlets remain opt-in. After upgrading, open ClosetLight in Devices & services: look for a native light entity and a diagnostic **Light control status**. The status shows `ready`, `api_read_only`, `unsupported_onoff_type`, or `disabled_in_options`. The status `ready` confirms capability detection, not physical write acceptance.
+The bundled integration is **v0.1.3b1 beta**, with physical M300 acceptance outstanding. Keep working contact/leak REST sensors until you have confirmed raw contact/leak polarity and transport recovery. Native lights are now enabled by default only for positively identified Light devices with writable OnOff traits. Other switches/outlets remain opt-in. After upgrading, open ClosetLight in Devices & services: look for a native light entity and a diagnostic **Light control status**. The status shows `ready`, `api_read_only`, `unsupported_onoff_type`, or `disabled_in_options`. The status `ready` confirms capability detection, not physical write acceptance.
 
 **HACS is another supported installation method.** Use either HACS **or** this one-shot installer to manage the native files, not both at once.

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.3b1 — 2026-11-04
+
+- Recognize Aqara-spec **optional min/max/step metadata** for writable
+  CurrentLevel, ColorXY and ColorTemperature, using documented defaults
+  only when the API omits those fields.
+- Preserve fail-closed behavior for explicit invalid bounds and nonwritable traits.
+- Publish sanitized, per-light support flags and numeric parameter metadata in
+  integration diagnostics, allowing on/off-only UI issues to be diagnosed
+  without exposing credentials or live device values.
+- Verify brightness slider and two color modes against synthetic HA light entities.
+- No change to on/off access, button events, contact/leak polarity, or entity IDs.
+
+**Acceptance:** Color and brightness writes remain unverified on actual M300 hardware.
+
+
 ## 0.1.2b1 — 2026-11-04
 
 ClosetLight native-control fix based on user-supplied, redacted M300 diagnostics.

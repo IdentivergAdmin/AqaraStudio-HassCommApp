@@ -17,7 +17,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .device import Capability, discover_capabilities, finite_number, strict_bool
+from .device import (
+    Capability,
+    discover_capabilities,
+    finite_number,
+    numeric_parameter,
+    strict_bool,
+)
 from .entity import AqaraStudioEntity, async_setup_platform_entities
 
 
@@ -94,7 +100,7 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
         trait = self._color_trait(self.capability.color_temp_key)
         if trait is None:
             return None
-        maximum = finite_number(trait.parameter.get("max"))
+        maximum = numeric_parameter(trait, "max", 500)
         return math.ceil(1000000 / maximum) if maximum else None
 
     @property
@@ -102,7 +108,7 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
         trait = self._color_trait(self.capability.color_temp_key)
         if trait is None:
             return None
-        minimum = finite_number(trait.parameter.get("min"))
+        minimum = numeric_parameter(trait, "min", 153)
         return math.floor(1000000 / minimum) if minimum else None
 
     @property
@@ -112,8 +118,8 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
             return None
         trait = self._color_trait(key)
         value = finite_number(trait.value) if trait else None
-        minimum = finite_number(trait.parameter.get("min")) if trait else None
-        maximum = finite_number(trait.parameter.get("max")) if trait else None
+        minimum = numeric_parameter(trait, "min", 153) if trait else None
+        maximum = numeric_parameter(trait, "max", 500) if trait else None
         if (
             value is None
             or minimum is None
@@ -171,11 +177,11 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
                 raise HomeAssistantError(
                     "This light does not advertise writable percentage brightness"
                 )
-            advertised_minimum = finite_number(trait.parameter.get("min")) or 0
+            advertised_minimum = numeric_parameter(trait, "min", 1) or 0
             minimum = max(1, advertised_minimum)
             maximum = 100
             value = max(minimum, brightness * 100 / 255)
-            step = finite_number(trait.parameter.get("step"))
+            step = numeric_parameter(trait, "step", 1)
             if step and step > 0:
                 minimum = (
                     advertised_minimum
@@ -211,9 +217,9 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
                     "This light does not support that color temperature"
                 )
             mired = round(1000000 / kelvin)
-            minimum = finite_number(trait.parameter.get("min"))
-            maximum = finite_number(trait.parameter.get("max"))
-            step = finite_number(trait.parameter.get("step", 1))
+            minimum = numeric_parameter(trait, "min", 153)
+            maximum = numeric_parameter(trait, "max", 500)
+            step = numeric_parameter(trait, "step", 1)
             if (
                 minimum is None
                 or maximum is None

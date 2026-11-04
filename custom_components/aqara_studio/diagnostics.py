@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.core import HomeAssistant
 
 from .const import CONF_EXCLUDED_DEVICES, DEFAULT_OPTIONS
-from .device import discover_capabilities, light_control_status
+from .device import discover_capabilities, finite_number, light_control_status
 
 if TYPE_CHECKING:
     from . import AqaraStudioConfigEntry
@@ -48,6 +48,43 @@ async def async_get_config_entry_diagnostics(
                 "present": device.present,
                 "reachable": device.reachable,
                 "eligible_lights": potential_light,
+                "light_features": [
+                    {
+                        "endpoint": cap.key.endpoint_id,
+                        "on_off": True,
+                        "brightness": cap.brightness_key is not None,
+                        "xy_color": cap.xy_color_key is not None,
+                        "color_temperature": cap.color_temp_key is not None,
+                    }
+                    for cap in eligible
+                    if cap.platform == "light"
+                ],
+                "light_trait_metadata": [
+                    {
+                        "endpoint": key.endpoint_id,
+                        "function": _code(key.function_code),
+                        "trait": _code(key.trait_code),
+                        "type": _code(trait.parameter.get("type")),
+                        "unit": (
+                            trait.parameter.get("unit")
+                            if trait.parameter.get("unit")
+                            in (None, "", "%", "percent", "percentage", "mired", "mireds")
+                            else "<redacted>"
+                        ),
+                        "min": finite_number(trait.parameter.get("min")),
+                        "max": finite_number(trait.parameter.get("max")),
+                        "step": finite_number(trait.parameter.get("step")),
+                        "readable": trait.readable,
+                        "writable": trait.writable,
+                    }
+                    for key, trait in device.traits.items()
+                    if (key.function_code, key.trait_code)
+                    in {
+                        ("LevelControl", "CurrentLevel"),
+                        ("ColorControl", "ColorXY"),
+                        ("ColorControl", "ColorTemperature"),
+                    }
+                ],
                 "light_control_status": [
                     light_control_status(device, point, coordinator.options)
                     for key, point in device.traits.items()
