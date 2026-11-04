@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.core import HomeAssistant
 
 from .const import CONF_EXCLUDED_DEVICES, DEFAULT_OPTIONS
-from .device import discover_capabilities
+from .device import discover_capabilities, light_control_status
 
 if TYPE_CHECKING:
     from . import AqaraStudioConfigEntry
@@ -37,7 +37,7 @@ async def async_get_config_entry_diagnostics(
         capabilities = discover_capabilities(device, coordinator.options)
         supported = {cap.key for cap in capabilities}
         eligible = discover_capabilities(
-            device, {**coordinator.options, "enable_controls": True}
+            device, {**coordinator.options, "enable_light_controls": True}
         )
         potential_light = sum(cap.platform == "light" for cap in eligible)
         light_candidates += potential_light
@@ -48,6 +48,12 @@ async def async_get_config_entry_diagnostics(
                 "present": device.present,
                 "reachable": device.reachable,
                 "eligible_lights": potential_light,
+                "light_control_status": [
+                    light_control_status(device, point, coordinator.options)
+                    for key, point in device.traits.items()
+                    if (key.function_code, key.trait_code) == ("Output", "OnOff")
+                    and "Light" in device.device_types
+                ],
                 "capabilities": [
                     {
                         "platform": cap.platform,
@@ -97,6 +103,9 @@ async def async_get_config_entry_diagnostics(
             "enabled_lights": enabled_lights,
             "controls_opted_in": bool(
                 coordinator.options.get("enable_controls", False)
+            ),
+            "light_controls_enabled": bool(
+                coordinator.options.get("enable_light_controls", True)
             ),
         },
         "live_button_observations": [

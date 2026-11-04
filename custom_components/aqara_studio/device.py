@@ -361,8 +361,21 @@ def light_output(device: StudioDevice, primary: Trait) -> bool:
         for key in device.traits
         if key.endpoint_id == primary.key.endpoint_id
     }
-    # Handles real light strips whose endpoint labels aren't the literal "Light".
-    return bool({"Lighting", "ColorControl"} & functions)
+    # Same-endpoint lighting controls are the strongest positive evidence.
+    if {"Lighting", "ColorControl"} & functions:
+        return True
+    # Aqara specifies deviceTypesList ["Light"] as an explicit device type.
+    # Allow the device-level type only for an unambiguous single-output light;
+    # never treat a multi-endpoint relay, valve or mixed-function device as light.
+    outputs = [
+        item for item in device.traits.values()
+        if (item.key.function_code, item.key.trait_code) == ("Output", "OnOff")
+    ]
+    return (
+        set(device.device_types) == {"Light"}
+        and len(outputs) == 1
+        and outputs[0].key == primary.key
+    )
 
 
 def _integer_trait(device: StudioDevice, primary: Trait, code: str) -> Trait | None:
@@ -416,6 +429,23 @@ def xy_color_trait(device: StudioDevice, primary: Trait) -> Trait | None:
     return trait
 
 
+
+def light_control_status(
+    device: StudioDevice, trait: Trait, options: Mapping[str, Any] | None = None
+) -> str:
+    """Give an explicit, safe reason a light may not have native controls."""
+    options = options or {}
+    if not light_output(device, trait):
+        return "not_a_light"
+    if trait.parameter.get("type") not in {"Bool", "Boolean", "bool", "boolean"}:
+        return "unsupported_onoff_type"
+    if not trait.writable:
+        return "api_read_only"
+    if not options.get("enable_light_controls", True):
+        return "disabled_in_options"
+    return "ready"
+
+
 def discover_capabilities(
     device: StudioDevice, options: Mapping[str, Any] | None = None
 ) -> list[Capability]:
@@ -465,11 +495,32 @@ def discover_capabilities(
             # Keep a stable read-only state entity when controls are toggled.
             # The optional actuator uses another HA platform with the same
             # underlying trait identity; neither registry entry is deleted.
+            is_light = light_output(device, trait)
+            # Lighting is a first-class HA device, enabled by default only
+            # with explicit API write permission. Other switching stays opt-in.
             controls = (
-                options.get("enable_controls", False)
-                and trait.writable
-                and trait.parameter.get("type") == "Bool"
+                trait.writable
+                and trait.parameter.get("type")
+                in {"Bool", "Boolean", "bool", "boolean"}
+                and (
+                    (is_light and options.get("enable_light_controls", True))
+                    or (
+                        not is_light
+                        and options.get("enable_controls", False)
+                        and trait.endpoint_type in {"Switch", "Outlet"}
+                    )
+                )
             )
+            if is_light:
+                capabilities.append(
+                    Capability(
+                        key,
+                        "sensor",
+                        "Light control status",
+                        "light_readiness",
+                        diagnostic=True,
+                    )
+                )
             capabilities.append(
                 Capability(
                     key,
@@ -486,7 +537,7 @@ def discover_capabilities(
             xy_color_key = None
             color_mode_key = None
             if controls:
-                if light_output(device, trait):
+                if is_light:
                     platform = "light"
                     if brightness := brightness_trait(device, trait):
                         brightness_key = brightness.key
