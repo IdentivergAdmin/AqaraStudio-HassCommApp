@@ -20,13 +20,10 @@ def test_release_contract_matches_every_shipped_artifact():
     )
     packed = json.loads(
         (
-            ROOT
-            / "aqara_studio_installer/rootfs/opt/aqara_studio/manifest.json"
+            ROOT / "aqara_studio_installer/rootfs/opt/aqara_studio/manifest.json"
         ).read_text()
     )
-    options = yaml.safe_load(
-        (ROOT / "aqara_studio_installer/config.yaml").read_text()
-    )
+    options = yaml.safe_load((ROOT / "aqara_studio_installer/config.yaml").read_text())
     project = tomllib.loads((ROOT / "pyproject.toml").read_text())
     docker = (ROOT / "aqara_studio_installer/Dockerfile").read_text()
     readme = (ROOT / "README.md").read_text()

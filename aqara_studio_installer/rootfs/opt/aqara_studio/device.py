@@ -433,9 +433,7 @@ class ColorTemperatureProfile:
         value = finite_number(raw)
         if value is None or not self.minimum <= value <= self.maximum:
             return None
-        return (
-            round(1_000_000 / value) if self.unit == "mired" else round(value)
-        )
+        return round(1_000_000 / value) if self.unit == "mired" else round(value)
 
     def from_kelvin(self, kelvin: int) -> int | None:
         """Encode a HA Kelvin request in the device's advertised raw units."""

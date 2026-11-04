@@ -58,7 +58,9 @@ def prepare_real_metadata(coordinator, unit: str = "K"):
     remapped = {}
     for key, trait in device.traits.items():
         if key.endpoint_id == 1:
-            key = TraitKey(key.device_id, payload["endpoint"], key.function_code, key.trait_code)
+            key = TraitKey(
+                key.device_id, payload["endpoint"], key.function_code, key.trait_code
+            )
             trait.key = key
         remapped[key] = trait
     device.traits = remapped
