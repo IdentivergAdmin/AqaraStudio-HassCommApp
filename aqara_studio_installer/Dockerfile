@@ -2,7 +2,7 @@
 # A minimal Alpine image avoids the irrelevant s6-overlay lifecycle messages.
 FROM alpine:3.24
 
-ARG BUILD_VERSION="0.1.2"
+ARG BUILD_VERSION="0.1.3"
 ARG BUILD_ARCH="amd64"
 
 RUN apk add --no-cache bash jq

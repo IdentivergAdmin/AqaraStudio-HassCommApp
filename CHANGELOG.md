@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.2b1 — 2026-11-04
+
+ClosetLight native-control fix based on user-supplied, redacted M300 diagnostics.
+
+- Make writable, positively identified Light devices appear as native `light` entities by default without enabling unrelated switches/outlets.
+- Recognize official device-level Light classification for unambiguous single-output endpoints; preserve denylist for lock, garage, cover, valve and root types.
+- Show a read-only `Light control status` diagnostic on the device page with an actionable reason when native control is not available.
+- Accept explicitly advertised boolean type aliases without inventing permissions; continue to require writable metadata and device availability.
+- Keep existing Output state entities, custom entity names, contact/leak mappings, and automations intact.
+- Give a single-light device its natural Home Assistant name instead of "Power".
+- Add synthetic M300 light-strip discovery, readiness and option regression coverage.
+
+**Validation boundary:** Real control writes and physical color output are not yet certified.
+
+
 ## 0.1.1b1 — 2026-11-03
 
 Usability and native-light beta update.

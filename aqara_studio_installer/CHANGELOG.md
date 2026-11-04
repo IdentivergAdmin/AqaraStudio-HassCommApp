@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 — 2026-11-04
+
+- Bundle native Aqara Studio integration v0.1.2b1.
+- Native lighting controls enabled by default only for positively identified Light devices with writable OnOff traits.
+- Add device-page diagnostic for blocked light controls; switches/outlets remain opt-in.
+- Preserve version-aware, automatically backed-up, one-start upgrades without configuration toggles.
+
 ## 0.1.2 — 2026-11-03
 
 - **No configuration form or replace_existing toggle.** One Start handles a missing, outdated or already-current native integration.

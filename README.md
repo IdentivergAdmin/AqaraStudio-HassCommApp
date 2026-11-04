@@ -17,7 +17,7 @@ the M300 to advertise an outward Matter Bridge role.
 
 ## Beta status
 
-Version **0.1.1b1** is a beta update. Automated tests use synthetic fixtures
+Version **0.1.2b1** is a beta update. Automated tests use synthetic fixtures
 derived from the current vendor contract. A successful test suite is not a live
 hub compatibility certification. Physical device acceptance is still required;
 see [the acceptance runbook](docs/ACCEPTANCE.md).
@@ -79,16 +79,16 @@ The one-shot installer stopping is normal. **Do not put your API token in the
 installer**; only enter it in the native Aqara Studio config flow.
 
 **Upgrades are now one Start, no toggles:** update the **Installer App** to
-**v0.1.2 or later**, then press **Start** once and read its Logs.
+**v0.1.3 or later**, then press **Start** once and read its Logs.
 The installer automatically compares native versions: **UPGRADE** makes a backup
 and installs newer code, **ALREADY CURRENT** makes no changes or backups, and
 **DOWNGRADE BLOCKED** refuses an older package. **Restart Home Assistant Core
 only after FIRST INSTALL or UPGRADE reports SUCCESS.** The previous
 `replace_existing` option is gone and any old saved value is ignored.
 
-**Current installed native v0.1.1b1?** Upgrading just the Installer App to
-v0.1.2 should report **ALREADY CURRENT**. There is no reason to reinstall or
-restart Core when the native code is already the bundled version.
+**Current installed native v0.1.1b1?** Installer App v0.1.3 upgrades it to
+native **v0.1.2b1**, with an automatic backup. Restart Core on success.
+Once installed, repeated Starts correctly report **ALREADY CURRENT**.
 See [the simplified upgrade/rollback guide](aqara_studio_installer/DOCS.md).
 
 ### HACS custom integration
@@ -135,13 +135,16 @@ identity. Reauthentication handles credentials rejected by Studio.
 | Inventory reconciliation interval | 300 seconds | Discover new/changed devices; 60–3,600 seconds |
 | Enable WebSocket | On | Use local push and restore subscriptions after reconnect |
 | Experimental button events | Off | Enable live button event entities and decoding |
-| Enable supported controls | Off | Permit verified writable light/switch controls |
+| Enable native light controls | **On** | Create native lights only for confirmed writable Light endpoints; off keeps read-only state |
+| Enable writable switches/outlets (advanced) | Off | Permit explicit switch/outlet endpoints only; no lock/garage/valve control |
 | Excluded devices | None | Skip selected devices without deleting other integrations |
 | Contact polarity | Unconfirmed | Explicit true/open or false/open mapping |
 | Leak polarity | Unconfirmed | Explicit true/wet or false/wet mapping |
 
-Keep the defaults during initial read-only acceptance. Enabling controls cannot
-override missing writable access flags or add unsupported vendor operations.
+Light controls are enabled by default only for positively identified writable
+lights. Other controls are off during initial acceptance. An exposed control
+still requires physical testing; missing writable access flags or unsupported
+vendor operations cannot be overridden by options.
 
 ## Native lights, color control, and Studio management
 
@@ -151,11 +154,27 @@ same-endpoint Lighting/ColorControl functions. A writable `Switch`/`Outlet`
 endpoint can become a native `switch`. Unknown or hazardous endpoints never
 get an actuator based on an OnOff trait alone.
 
-To **enable physical light/switch control**, open **Settings → Devices & services
-→ Aqara Studio → Configure/Options → Enable verified light and switch controls**.
-Save, allow the config entry to reload, and open the light device. With this
-option off, only the safe read-only output state appears. This switch remains
-off by default even after upgrading.
+**Native lights are on by default** when Aqara Studio advertises both a
+recognized light device/endpoint and a writable boolean `Output/OnOff` trait.
+They appear as Home Assistant `light` entities, while the previous
+`Output state` sensor is preserved so existing automations are not broken.
+
+For an already-configured installation, use **Settings → Apps → Aqara Studio
+Integration Installer (Beta) → Update to v0.1.3 → Start once**, then restart
+Home Assistant Core after a successful `UPGRADE` log. Open **Settings →
+Devices & services → Aqara Studio → Devices → ClosetLight**. A new native light
+entity should appear. The old `Output state` sensor can remain; do not delete
+it without checking automations.
+
+**Light control status:** the device now also exposes a diagnostic sensor:
+`ready` (API reports a supported writable light), `api_read_only`,
+`unsupported_onoff_type`, or `disabled_in_options`. A `ready` result
+confirms the API definition, **not** a successful physical write.
+
+To disable light controls, open **Aqara Studio → Configure/Options → Enable
+native light controls** and turn it off. **Switches and outlets remain disabled
+by default** and have their own advanced option. The integration still never
+exposes unsupported locks, valves, covers, or garage actuation.
 
 For eligible lighting endpoints:
 
@@ -267,7 +286,7 @@ automations separately. Keep the private REST backup until acceptance is complet
 | Cannot connect | Check reachability from the HA host/container, VLAN/firewall rules, scheme/port and HTTPS certificate trust |
 | Contact/leak remains Unknown | Confirm polarity and inspect boolean `raw_value`; missing or malformed readings intentionally stay unknown |
 | Device has no entities | Check supported function/trait pairs and access flags in sanitized diagnostics |
-| Light only shows Output state | Enable verified light/switch controls in integration options; check lighting eligibility in diagnostics |
+| Light only shows Output state | Upgrade to native v0.1.2b1; inspect **Light control status** on the physical device page and redacted eligibility diagnostics |
 | Studio link is missing | Reload the Aqara Studio integration and open the physical device's Visit/Configuration link |
 | Entities unavailable | Check transport and Studio reachability; a cached value alone does not prove current availability |
 | Updates arrive only on polling | Inspect push diagnostics, proxy support for `/open/ws`, and token permissions |

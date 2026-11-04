@@ -28,7 +28,6 @@ from .api import (
 )
 from .const import (
     CONF_ENABLE_BUTTON_EVENTS,
-    CONF_ENABLE_CONTROLS,
     CONF_ENABLE_WEBSOCKET,
     CONF_EXCLUDED_DEVICES,
     CONF_GATEWAY_ID,
