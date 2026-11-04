@@ -2,13 +2,15 @@
 
 ## Scope
 
-`0.1.0b1` is a community beta, independent of Aqara. Hardware acceptance is
-required before relying on its states for important automations.
+The `0.1.4b1` integration is a community beta, independent of Aqara.
+Physical acceptance is required before relying on its states for important
+automations.
 
-Operation is read-only by default. Explicitly enabled controls are limited to
-supported writable traits. There is no remote unlock, garage actuation,
+**Native light controls are enabled by default only for positively identified
+lights with advertised writable traits.** Advanced switches/outlets remain
+off until enabled by the owner. There is no remote unlock, garage actuation,
 commissioning, unbinding, arbitrary execution, cloud callback, telemetry or
-automatic firewall configuration.
+automatic firewall configuration. No separate Supervisor App is necessary.
 
 ## Credentials and network access
 

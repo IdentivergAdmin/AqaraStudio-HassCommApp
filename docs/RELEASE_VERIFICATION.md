@@ -1,99 +1,100 @@
-# Release verification: installer, native integration and real M300 light
+# Distribution and release contract — HACS / Marketplace
 
-This is a **blocking release checklist**. Do not publish, recommend a restart,
-or declare physical light control fixed unless the relevant gates have passed.
+Aqara Studio is **one native Home Assistant integration**, not a
+Home Assistant OS App. The public GitHub repository publishes
+`custom_components/aqara_studio` using `hacs.json`, and HACS /
+Home Assistant Marketplace installs and updates it.
 
-## Exact release pair
+**Release contract:**
 
-| Artifact | Version | Location |
-| --- | --- | --- |
-| Home Assistant Installer App | **0.1.5** | `aqara_studio_installer/config.yaml` |
-| Bundled native Aqara Studio | **0.1.4b1** | `aqara_studio_installer/rootfs/opt/aqara_studio/manifest.json` |
-| Source native Aqara Studio | **0.1.4b1** | `custom_components/aqara_studio/manifest.json` |
-| Build release contract | Both versions | `release_contract.json` |
+- Native integration version and GitHub Release tag are both
+  **`0.1.4b1`** (no `v` prefix).
+- `custom_components/aqara_studio/manifest.json`,
+  `pyproject.toml`, and `release_contract.json` must agree.
+- `hacs.json` minimum Home Assistant version is `2026.10.0`.
+- The root of the default branch must have **no `repository.yaml`
+  or `aqara_studio_installer/`**. Marketplace refuses mixed
+  repositories containing Home Assistant OS Apps.
+- The old installer remains available in Git history and the branch
+  `legacy/supervisor-installer-v0.1.5`, but **not** as a second
+  installation/update manager.
 
-These are **intentionally different version numbers**. Updating the App does
-not install or reload the native integration by itself. The owner must press
-**Start** and check **Logs**. For a running v0.1.3b1 native installation,
-the expected log is:
+## CI / publication gates
 
-```text
-[Aqara Studio] UPGRADE 0.1.3b1 -> 0.1.4b1 (automatic backup).
-[Aqara Studio] BACKUP: /homeassistant/aqara_studio_installer_backups/...
-[Aqara Studio] SUCCESS — native integration 0.1.4b1 installed. Restart Home Assistant Core to load the new code.
-```
+The [test workflow](../.github/workflows/ci.yml) exercises the native
+Python integration against Home Assistant 2026.10.4. The
+[validator workflow](../.github/workflows/validate.yml) runs
+hassfest and HACS repository validation.
 
-Only after that log should the owner restart **Home Assistant Core once**.
-Then confirm native **0.1.4b1** at **Settings → Devices & services →
-Aqara Studio** or in the integration's sanitized diagnostics
-(`integration_manifest.version`).
+The [release workflow](../.github/workflows/release.yml), triggered
+on a native-manifest version change to `main` or manual dispatch,
+runs lint, the full test suite, HACS validation and hassfest again
+before publishing **one immutable GitHub release**.
 
-## Root cause, from actual sanitized diagnostics
+The release workflow refuses to publish when:
 
-On **2026-11-04** Home Assistant **2026.10.4** reported one writable light
-on endpoint 2. `CurrentLevel` was already accepted as brightness.
-Two additional writable traits were previously rejected:
+1. The Git reference is not the default `main` branch.
+2. The manifest, `pyproject.toml`, release contract and expected
+   tag disagree.
+3. A legacy Home Assistant OS App definition still exists in
+   the default branch.
+4. HACS, hassfest, Ruff or Python tests fail.
+5. The version already has a GitHub Release. Existing releases are
+   never silently overwritten or retagged.
 
-- **ColorXY**, type `Integer`: min 0, max **4294967303**, step 1,
-  versus the Aqara uint32 specification max **4294967295**.
-  This is an eight-unit metadata overshoot, **not** permission to send
-  larger values. Actual writes must remain `0..0xffffffff`.
-- **ColorTemperature**, type `Integer`: min **2703**, max **6536**,
-  step 1. The diagnostic sanitized the unit; Aqara Studio presented
-  Kelvin, and these exact values correspond to 370 and 153 mired.
-  Native 0.1.3b1 wrongly required 153–500 mired metadata. The new
-  parser explicitly distinguishes valid Kelvin and mired profiles,
-  with an evidence-specific fallback for the exact M300 descriptor.
+GitHub Actions requires write permission to `contents` in the
+release job. If this repository's policy prevents the workflow
+from creating releases, the job will fail; a maintainer must
+address repository permission settings explicitly. Do not
+pretend a PR merge created a GitHub Release.
 
-The real diagnostic file **must not be committed**. Only
-`tests/fixtures/m300_lightstrip_redacted.json` may be committed; it
-contains numeric trait metadata but no raw device IDs, tokens, names,
-network addresses or physical sensor readings. Its sanitized unit
-placeholder is **not claimed to be the raw API unit**.
+## Pre-releases and compatibility
 
-## Required quality gates
+This release is `0.1.4b1`, and automated release publication
+marks it as a **GitHub pre-release**, because the project has not
+completed independent physical acceptance across all device types.
 
-Before a PR can merge:
+HACS / Marketplace normally only offers GitHub pre-releases when
+the user enables **Pre-release** for that repository. When there
+are no GitHub Releases, the default branch's commit hash may
+be offered instead. GitHub Releases are necessary for a
+human-readable version/update cadence and eventual default
+catalog submission.
 
-1. `pytest` covers the real redacted metadata fixture, `ColorMode.XY`,
-   `ColorMode.COLOR_TEMP`, brightness, Kelvin readback, raw Kelvin
-   writes, mired regression and coordinator authorization.
-2. Outgoing XY is always uint32, even when advertised max is
-   `0x100000007`. Larger descriptors and out-of-range values are denied.
-3. Invalid/contradictory temperature units and ranges fail closed.
-4. `ruff check`, `ruff format --check`, hassfest and HACS pass.
-5. App installer tests and real Alpine container smoke run pass; the
-   packaged native integration matches source **byte for byte**.
-6. The release-contract test verifies exact App/native pair across
-   manifests, Docker build metadata, documentation and
-   `release_contract.json`.
-7. PR merges into `main`; re-read `main` to verify release versions
-   and source/package parity. Feature-branch success is not deployment.
+Custom repositories can be installed by anyone with a GitHub
+connection, but **default catalog listing** requires a separate
+submission to the public
+[`hacs/default` catalog](https://github.com/hacs/default)
+and its own review; this project does not claim catalog inclusion.
 
-**These are simulated software gates. They do not contact the owner's LAN,
-M300, physical LED strip or Aqara Studio API.**
+## Update and restart behavior
 
-## User-side physical acceptance after one restart
+HACS (HA 2026.10 and earlier) and Marketplace (2026.11+) own
+installation, version tracking and update discovery. Home
+Assistant Core owns runtime WebSocket, REST, entity state and
+automation interactions.
 
-1. Navigate to **Tools → States** and select `light.closetlight`.
-   Check `supported_color_modes` includes `xy` and `color_temp`.
-   For this specific light, expect minimum **2703 K** and maximum
-   **6536 K**; the two modes can appear in either order.
-2. `supported_features: 0` is normal: this field covers extra effects,
-   transition and flash support, **not** color and brightness.
-   `color_mode: null` and `brightness: null` while Off are normal.
-3. **Do not click "Set state" to test hardware.** That UI changes HA's
-   local state representation, not the physical light.
-4. Click the ClosetLight entity **name** on its device page for the
-   controls. If necessary, use **Tools → Actions**, targeting
-   `light.closetlight`, with `light.turn_on` and
-   `brightness_pct: 50`; then `color_temp_kelvin: 4000`; then a
-   color through the UI. Confirm physical changes and subsequent
-   Studio/HA readback for each operation.
-5. If the UI still shows brightness only, download **sanitized
-   diagnostics** and inspect `devices[].light_features`,
-   `light_profiles`, and `light_trait_metadata`.
-6. Do not retire working REST/Matter automations until physical
-   acceptance succeeds.
+After installing new Python integration files, **Home Assistant
+Core normally needs a restart** to load the new code. This
+is the same as other community Python integrations. No
+one-shot App is involved. An App cannot safely hot-swap
+already imported Python modules to eliminate the restart.
 
-For broader regression and recovery, see [ACCEPTANCE.md](ACCEPTANCE.md).
+## User-facing acceptance and data safety
+
+- Existing installer users adopt HACS/Marketplace via
+  [MIGRATE_LEGACY_INSTALLER.md](MIGRATE_LEGACY_INSTALLER.md).
+  Do not delete the existing HA config entry, native folder,
+  or automations during migration.
+- Sensitive contact/leak mappings stay explicitly calibrated.
+  The integration must not invent safe states or replay stale
+  button press events.
+- M300 light strip on/off and color have been physically observed
+  in the owner's environment; this **does not** certify all
+  models and firmware revisions.
+- The real M300 diagnostic is not committed. Only the sanitized
+  metadata fixture remains in `tests/fixtures`.
+- Never include tokens, local addresses, raw device IDs, or
+  household topology in GitHub issues or release notes.
+
+See [ACCEPTANCE.md](ACCEPTANCE.md) and [CHANGELOG.md](../CHANGELOG.md).

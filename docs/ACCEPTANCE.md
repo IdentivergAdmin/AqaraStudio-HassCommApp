@@ -11,10 +11,14 @@ reference until the corresponding acceptance steps pass.
 2. Record actual HA version, integration commit/version, Studio version and hub
    firmware from the running systems. Do not assume historical versions.
 3. Record a test contact's old entity ID and actual new entity ID privately.
-4. Install the implementation using the correct branch/release path in README.
-   Check that the installed `manifest.json` version matches the intended beta.
-5. Add the integration in **Settings → Devices & services**, entering the local
-   Studio host and Developer API token. Do not share the token with maintainers.
+4. Install the native integration with **HACS** (Home Assistant 2026.10
+   and earlier) or **Marketplace** (2026.11+), using the verified GitHub
+   pre-release when available. Do **not** use the retired Supervisor App.
+   Check the installed `manifest.json` version matches the selected release.
+5. Configure the integration in **Settings → Devices & services**, entering the
+   local Studio host and Developer API token only for a genuinely new
+   config entry. **Do not recreate an existing config entry merely because
+   the distribution manager changed.** Do not share tokens with maintainers.
 6. Keep experimental button events and advanced switch/outlet controls
    disabled initially. Writable, positively identified lights are enabled
    by default; do not invoke their actions before choosing a harmless
