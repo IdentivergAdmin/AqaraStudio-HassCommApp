@@ -12,9 +12,7 @@ POWER = TraitKey("synthetic-light", 1, "Output", "OnOff")
 LEVEL = TraitKey("synthetic-light", 1, "LevelControl", "CurrentLevel")
 
 
-async def test_explicitly_disabled_light_controls_deny_writes(
-    coordinator, mock_client
-):
+async def test_explicitly_disabled_light_controls_deny_writes(coordinator, mock_client):
     coordinator.options["enable_light_controls"] = False
     with pytest.raises(HomeAssistantError):
         await coordinator.async_write_trait(POWER, True)
