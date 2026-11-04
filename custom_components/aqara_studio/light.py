@@ -39,7 +39,8 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
         # Home Assistant's primary entity should use the physical device name
         # directly (ClosetLight), not "ClosetLight Power".
         lights = [
-            cap for cap in discover_capabilities(self.device, coordinator.options)
+            cap
+            for cap in discover_capabilities(self.device, coordinator.options)
             if cap.platform == "light"
         ]
         if len(lights) == 1:

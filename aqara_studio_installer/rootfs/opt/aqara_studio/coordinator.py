@@ -552,9 +552,7 @@ class AqaraStudioCoordinator(DataUpdateCoordinator[dict[str, StudioDevice]]):
     async def async_write_trait(self, key: TraitKey, value: Any) -> None:
         """Permit only discovered writable light/switch traits."""
         trait = self.get_trait(key)
-        if (
-            trait is None or not trait.writable
-        ):
+        if trait is None or not trait.writable:
             raise HomeAssistantError(
                 "Aqara Studio controls are not enabled for this trait"
             )

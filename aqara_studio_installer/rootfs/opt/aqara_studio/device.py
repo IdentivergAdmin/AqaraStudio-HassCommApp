@@ -368,7 +368,8 @@ def light_output(device: StudioDevice, primary: Trait) -> bool:
     # Allow the device-level type only for an unambiguous single-output light;
     # never treat a multi-endpoint relay, valve or mixed-function device as light.
     outputs = [
-        item for item in device.traits.values()
+        item
+        for item in device.traits.values()
         if (item.key.function_code, item.key.trait_code) == ("Output", "OnOff")
     ]
     return (
@@ -427,7 +428,6 @@ def xy_color_trait(device: StudioDevice, primary: Trait) -> Trait | None:
     if minimum != 0 or maximum != 4294967295 or step != 1:
         return None
     return trait
-
 
 
 def light_control_status(

@@ -22,11 +22,18 @@ def add_lightstrip_traits(device) -> None:
     for fn, code, parameter, value in (
         ("Lighting", "EnableFlowMode", {"type": "Bool"}, False),
         ("ColorControl", "ColorXY", {"type": "UInt32", "min": 0, "max": 4294967295}, 0),
-        ("ColorControl", "ColorTemperature", {"type": "UInt32", "min": 153, "max": 500}, 270),
+        (
+            "ColorControl",
+            "ColorTemperature",
+            {"type": "UInt32", "min": 153, "max": 500},
+            270,
+        ),
     ):
         key = TraitKey(onoff.key.device_id, onoff.key.endpoint_id, fn, code)
         device.traits[key] = Trait(
-            key, {"readable": True, "writable": True, **parameter}, value,
+            key,
+            {"readable": True, "writable": True, **parameter},
+            value,
             endpoint_type="Unknown",
         )
 
@@ -56,7 +63,8 @@ async def test_light_readiness_is_visible_even_when_controls_disabled(hass):
     coordinator = FakeCoordinator(hass, {"enable_light_controls": False})
     device = coordinator.data["synthetic-light"]
     status = next(
-        cap for cap in discover_capabilities(device, coordinator.options)
+        cap
+        for cap in discover_capabilities(device, coordinator.options)
         if cap.kind == "light_readiness"
     )
     entity = AqaraStudioSensor(coordinator, status)
@@ -91,10 +99,20 @@ async def test_legacy_switch_setting_does_not_override_explicit_light_off(hass):
         hass, {"enable_controls": True, "enable_light_controls": False}
     )
     light = coordinator.data["synthetic-light"]
-    assert light_control_status(
-        light, next(t for t in light.traits.values() if t.key.trait_code == "OnOff"),
-        coordinator.options
-    ) == "disabled_in_options"
-    assert not any(cap.platform == "light" for cap in discover_capabilities(light, coordinator.options))
+    assert (
+        light_control_status(
+            light,
+            next(t for t in light.traits.values() if t.key.trait_code == "OnOff"),
+            coordinator.options,
+        )
+        == "disabled_in_options"
+    )
+    assert not any(
+        cap.platform == "light"
+        for cap in discover_capabilities(light, coordinator.options)
+    )
     switch = coordinator.data["synthetic-switch"]
-    assert any(cap.platform == "switch" for cap in discover_capabilities(switch, coordinator.options))
+    assert any(
+        cap.platform == "switch"
+        for cap in discover_capabilities(switch, coordinator.options)
+    )

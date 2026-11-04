@@ -19,9 +19,7 @@ async def test_lights_are_native_by_default_but_switches_remain_opt_in(hass):
         "light",
         "sensor",
     }
-    assert {c.platform for c in discover_capabilities(switch)} == {
-        "binary_sensor"
-    }
+    assert {c.platform for c in discover_capabilities(switch)} == {"binary_sensor"}
     options = {"enable_light_controls": False, "enable_controls": False}
     assert {c.platform for c in discover_capabilities(light, options)} == {
         "binary_sensor",

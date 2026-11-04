@@ -38,7 +38,9 @@ class AqaraStudioSensor(AqaraStudioEntity, SensorEntity):
         if self.trait is None:
             return None
         if self.capability.kind == "light_readiness":
-            return light_control_status(self.device, self.trait, self.coordinator.options)
+            return light_control_status(
+                self.device, self.trait, self.coordinator.options
+            )
         value = finite_number(self.trait.value)
         if value is None:
             return None
