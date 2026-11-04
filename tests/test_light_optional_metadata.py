@@ -107,14 +107,11 @@ async def test_diagnostics_show_feature_flags_not_light_values(
     hass, config_entry, coordinator
 ):
     report = await async_get_config_entry_diagnostics(hass, config_entry)
-    features = [
-        item for dev in report["devices"] for item in dev["light_features"]
-    ]
+    features = [item for dev in report["devices"] for item in dev["light_features"]]
     assert any(item["brightness"] is True for item in features)
     assert all(
-        set(item) == {
-            "endpoint", "on_off", "brightness", "xy_color", "color_temperature"
-        }
+        set(item)
+        == {"endpoint", "on_off", "brightness", "xy_color", "color_temperature"}
         for item in features
     )
     metadata = [
@@ -122,9 +119,18 @@ async def test_diagnostics_show_feature_flags_not_light_values(
     ]
     assert any(item["trait"] == "CurrentLevel" for item in metadata)
     assert all(
-        set(item) == {
-            "endpoint", "function", "trait", "type", "unit",
-            "min", "max", "step", "readable", "writable"
+        set(item)
+        == {
+            "endpoint",
+            "function",
+            "trait",
+            "type",
+            "unit",
+            "min",
+            "max",
+            "step",
+            "readable",
+            "writable",
         }
         for item in metadata
     )

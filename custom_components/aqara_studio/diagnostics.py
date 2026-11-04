@@ -68,7 +68,15 @@ async def async_get_config_entry_diagnostics(
                         "unit": (
                             trait.parameter.get("unit")
                             if trait.parameter.get("unit")
-                            in (None, "", "%", "percent", "percentage", "mired", "mireds")
+                            in (
+                                None,
+                                "",
+                                "%",
+                                "percent",
+                                "percentage",
+                                "mired",
+                                "mireds",
+                            )
                             else "<redacted>"
                         ),
                         "min": finite_number(trait.parameter.get("min")),
