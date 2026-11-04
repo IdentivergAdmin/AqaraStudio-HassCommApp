@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.4 — 2026-11-04
+
+- Bundle native Aqara Studio v0.1.3b1, improving detection of optional
+  brightness, CIE XY and color-temperature parameters on light strips.
+- Preserve idempotent one-shot upgrades, automatic backups and rollback.
+- Add sanitized light feature diagnostics; no raw device values included.
+
+
 ## 0.1.3 — 2026-11-04
 
 - Bundle native Aqara Studio integration v0.1.2b1.

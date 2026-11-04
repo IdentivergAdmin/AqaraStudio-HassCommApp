@@ -17,7 +17,7 @@ the M300 to advertise an outward Matter Bridge role.
 
 ## Beta status
 
-Version **0.1.2b1** is a beta update. Automated tests use synthetic fixtures
+Version **0.1.3b1** is a beta update. Automated tests use synthetic fixtures
 derived from the current vendor contract. A successful test suite is not a live
 hub compatibility certification. Physical device acceptance is still required;
 see [the acceptance runbook](docs/ACCEPTANCE.md).
@@ -79,15 +79,15 @@ The one-shot installer stopping is normal. **Do not put your API token in the
 installer**; only enter it in the native Aqara Studio config flow.
 
 **Upgrades are now one Start, no toggles:** update the **Installer App** to
-**v0.1.3 or later**, then press **Start** once and read its Logs.
+**v0.1.4 or later**, then press **Start** once and read its Logs.
 The installer automatically compares native versions: **UPGRADE** makes a backup
 and installs newer code, **ALREADY CURRENT** makes no changes or backups, and
 **DOWNGRADE BLOCKED** refuses an older package. **Restart Home Assistant Core
 only after FIRST INSTALL or UPGRADE reports SUCCESS.** The previous
 `replace_existing` option is gone and any old saved value is ignored.
 
-**Current installed native v0.1.1b1?** Installer App v0.1.3 upgrades it to
-native **v0.1.2b1**, with an automatic backup. Restart Core on success.
+**Current installed native v0.1.2b1?** Installer App v0.1.4 upgrades it to
+native **v0.1.3b1**, with an automatic backup. Restart Core on success.
 Once installed, repeated Starts correctly report **ALREADY CURRENT**.
 See [the simplified upgrade/rollback guide](aqara_studio_installer/DOCS.md).
 
@@ -203,6 +203,40 @@ If lights do not appear, download sanitized integration diagnostics and inspect
 `lighting.eligible_lights` and `lighting.enabled_lights`, without posting any
 raw tokens or device identifiers. The device model may advertise functions that
 this release cannot safely control; unsupported traits are intentionally skipped.
+
+### Finding the brightness and color controls
+
+The device page's **Controls** section normally shows only an on/off switch.
+**Click the light's name**, not the toggle, to open Home Assistant's
+**more-info** dialog. The brightness slider and color/white-temperature
+controls live in that dialog when the integration advertises them.
+
+If this dialog is **still only a toggle**, open **Developer Tools → States**,
+select the `light` entity (for example `light.closetlight`), and inspect
+`supported_color_modes`, `color_mode`, and `brightness`:
+
+- `[onoff]` means Aqara Studio did **not** expose compatible writable
+  brightness/color metadata to this integration. A slider cannot be displayed
+  by changing integration options.
+- `[brightness]` means dimming is available.
+- `[xy, color_temp]` means full color and warm/cool white are available.
+
+Aqara data-model values for **CurrentLevel**, **ColorXY**, and
+**ColorTemperature** can omit their optional numeric min/max/step metadata.
+Native **v0.1.3b1** recognizes those documented defaults. It still refuses
+explicitly invalid parameters or unadvertised writable access.
+
+For further diagnosis, use **Aqara Studio integration → menu → Download diagnostics**
+and find the anonymized light under `devices[].light_features` and
+`devices[].light_trait_metadata`. The report shows capability availability,
+parameter types/units and numeric limits without including your API token,
+device ID, device names or actual sensor/color values. Share only this
+sanitized export, never a raw Studio API response containing credentials.
+
+If an option shows the literal `enable_light_controls` despite a checked box,
+the code already includes its translated label. Hard-refresh the HA browser tab
+(**Ctrl+Shift+R**) after Core restart. The option is already enabled; it
+does not control which brightness or color modes the API exposes.
 
 ## Supported capabilities
 

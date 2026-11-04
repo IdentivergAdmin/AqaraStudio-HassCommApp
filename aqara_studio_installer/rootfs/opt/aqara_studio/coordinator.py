@@ -46,7 +46,7 @@ from .device import (
     Trait,
     TraitKey,
     discover_capabilities,
-    finite_number,
+    numeric_parameter,
     parse_device,
     strict_bool,
 )
@@ -577,9 +577,9 @@ class AqaraStudioCoordinator(DataUpdateCoordinator[dict[str, StudioDevice]]):
         ):
             raise HomeAssistantError("Brightness is outside the supported range")
         if key.trait_code == "ColorTemperature":
-            minimum = finite_number(trait.parameter.get("min"))
-            maximum = finite_number(trait.parameter.get("max"))
-            step = finite_number(trait.parameter.get("step", 1))
+            minimum = numeric_parameter(trait, "min", 153)
+            maximum = numeric_parameter(trait, "max", 500)
+            step = numeric_parameter(trait, "step", 1)
             if (
                 type(value) is not int
                 or minimum is None
