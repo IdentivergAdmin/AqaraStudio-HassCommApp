@@ -28,7 +28,6 @@ from .api import (
 )
 from .const import (
     CONF_ENABLE_BUTTON_EVENTS,
-    CONF_ENABLE_CONTROLS,
     CONF_ENABLE_WEBSOCKET,
     CONF_EXCLUDED_DEVICES,
     CONF_GATEWAY_ID,
@@ -551,13 +550,9 @@ class AqaraStudioCoordinator(DataUpdateCoordinator[dict[str, StudioDevice]]):
         return remove
 
     async def async_write_trait(self, key: TraitKey, value: Any) -> None:
-        """Permit only mapped on/off and level writes after explicit opt-in."""
+        """Permit only discovered writable light/switch traits."""
         trait = self.get_trait(key)
-        if (
-            not self.options[CONF_ENABLE_CONTROLS]
-            or trait is None
-            or not trait.writable
-        ):
+        if trait is None or not trait.writable:
             raise HomeAssistantError(
                 "Aqara Studio controls are not enabled for this trait"
             )

@@ -20,6 +20,7 @@ CONF_INVENTORY_INTERVAL = "inventory_interval"
 CONF_ENABLE_WEBSOCKET = "enable_websocket"
 CONF_ENABLE_BUTTON_EVENTS = "enable_button_events"
 CONF_ENABLE_CONTROLS = "enable_controls"
+CONF_ENABLE_LIGHT_CONTROLS = "enable_light_controls"
 CONF_EXCLUDED_DEVICES = "excluded_devices"
 CONF_CONTACT_POLARITY = "contact_polarity"
 CONF_LEAK_POLARITY = "leak_polarity"
@@ -34,6 +35,7 @@ DEFAULT_OPTIONS = {
     CONF_ENABLE_WEBSOCKET: True,
     CONF_ENABLE_BUTTON_EVENTS: False,
     CONF_ENABLE_CONTROLS: False,
+    CONF_ENABLE_LIGHT_CONTROLS: True,
     CONF_EXCLUDED_DEVICES: [],
     CONF_CONTACT_POLARITY: "unconfirmed",
     CONF_LEAK_POLARITY: "unconfirmed",

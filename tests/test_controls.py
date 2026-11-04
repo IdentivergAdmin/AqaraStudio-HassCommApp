@@ -10,31 +10,45 @@ from custom_components.aqara_studio.switch import AqaraStudioSwitch
 from .entity_helpers import FakeCoordinator
 
 
-async def test_controls_disabled_by_default_and_type_gated(hass):
+async def test_lights_are_native_by_default_but_switches_remain_opt_in(hass):
     coordinator = FakeCoordinator(hass)
-    device = coordinator.data["synthetic-light"]
-    assert {c.platform for c in discover_capabilities(device)} == {"binary_sensor"}
-    options = {"enable_controls": True}
-    assert {c.platform for c in discover_capabilities(device, options)} == {
+    light = coordinator.data["synthetic-light"]
+    switch = coordinator.data["synthetic-switch"]
+    assert {c.platform for c in discover_capabilities(light)} == {
         "binary_sensor",
         "light",
+        "sensor",
     }
+    assert {c.platform for c in discover_capabilities(switch)} == {"binary_sensor"}
+    options = {"enable_light_controls": False, "enable_controls": False}
+    assert {c.platform for c in discover_capabilities(light, options)} == {
+        "binary_sensor",
+        "sensor",
+    }
+    assert {c.platform for c in discover_capabilities(switch, options)} == {
+        "binary_sensor"
+    }
+
+
+async def test_light_controls_require_real_writable_boolean_and_safe_identity(hass):
+    coordinator = FakeCoordinator(hass)
+    device = coordinator.data["synthetic-light"]
     trait = next(t for k, t in device.traits.items() if k.trait_code == "OnOff")
     trait.parameter["writable"] = False
-    assert {c.platform for c in discover_capabilities(device, options)} == {
-        "binary_sensor"
-    }
+    assert "light" not in {c.platform for c in discover_capabilities(device)}
     trait.parameter["writable"] = True
     trait.parameter["type"] = "Enum"
-    assert {c.platform for c in discover_capabilities(device, options)} == {
-        "binary_sensor"
-    }
+    assert "light" not in {c.platform for c in discover_capabilities(device)}
     trait.parameter["type"] = "Bool"
-    for endpoint_type in ("Lock", "GarageDoor", "Valve", "Unknown", "Public"):
+    for endpoint_type in ("Lock", "GarageDoor", "Valve", "Public", "Cover"):
         trait.endpoint_type = endpoint_type
-        assert {c.platform for c in discover_capabilities(device, options)} == {
-            "binary_sensor"
-        }
+        assert "light" not in {c.platform for c in discover_capabilities(device)}
+    # An unknown endpoint is safe only because this is explicitly a one-output
+    # device of documented type Light, not because its name contains Light.
+    trait.endpoint_type = "Unknown"
+    assert "light" in {c.platform for c in discover_capabilities(device)}
+    device.device_types = ("Switch",)
+    assert "light" not in {c.platform for c in discover_capabilities(device)}
 
 
 async def test_switch_writes_real_boolean_not_optimistic(hass):

@@ -12,14 +12,18 @@ POWER = TraitKey("synthetic-light", 1, "Output", "OnOff")
 LEVEL = TraitKey("synthetic-light", 1, "LevelControl", "CurrentLevel")
 
 
-async def test_readonly_default_denies_control(coordinator, mock_client):
+async def test_explicitly_disabled_light_controls_deny_writes(coordinator, mock_client):
+    coordinator.options["enable_light_controls"] = False
     with pytest.raises(HomeAssistantError):
         await coordinator.async_write_trait(POWER, True)
     mock_client.async_write_trait.assert_not_awaited()
 
 
-async def test_opted_in_write_is_sent_once_and_not_optimistic(coordinator, mock_client):
-    coordinator.options["enable_controls"] = True
+async def test_writable_light_is_allowed_by_default_without_global_switch_opt_in(
+    coordinator, mock_client
+):
+    assert coordinator.options["enable_controls"] is False
+    assert coordinator.options["enable_light_controls"] is True
     assert coordinator.get_trait(POWER).value is False
     await coordinator.async_write_trait(POWER, True)
     mock_client.async_write_trait.assert_awaited_once_with(POWER.as_dict(), True)

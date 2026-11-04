@@ -17,7 +17,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .device import Capability, finite_number, strict_bool
+from .device import Capability, discover_capabilities, finite_number, strict_bool
 from .entity import AqaraStudioEntity, async_setup_platform_entities
 
 
@@ -36,6 +36,15 @@ class AqaraStudioLight(AqaraStudioEntity, LightEntity):
 
     def __init__(self, coordinator, capability: Capability) -> None:
         super().__init__(coordinator, capability)
+        # Home Assistant's primary entity should use the physical device name
+        # directly (ClosetLight), not "ClosetLight Power".
+        lights = [
+            cap
+            for cap in discover_capabilities(self.device, coordinator.options)
+            if cap.platform == "light"
+        ]
+        if len(lights) == 1:
+            self._attr_name = None
         modes = set()
         if capability.xy_color_key:
             modes.add(ColorMode.XY)

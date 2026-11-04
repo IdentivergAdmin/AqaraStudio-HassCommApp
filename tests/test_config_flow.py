@@ -281,6 +281,7 @@ async def test_options_update_and_invalid_interval_relationship(hass, config_ent
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert config_entry.options["poll_interval"] == 20
     assert config_entry.options["enable_controls"] is False
+    assert config_entry.options["enable_light_controls"] is True
 
 
 @pytest.mark.parametrize(

@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .device import Capability, finite_number
+from .device import Capability, finite_number, light_control_status
 from .entity import AqaraStudioEntity, async_setup_platform_entities
 
 
@@ -30,11 +30,17 @@ class AqaraStudioSensor(AqaraStudioEntity, SensorEntity):
         super().__init__(coordinator, capability)
         self._attr_device_class = capability.device_class
         self._attr_native_unit_of_measurement = capability.unit
+        if capability.kind == "light_readiness":
+            self._attr_state_class = None
 
     @property
-    def native_value(self) -> float | None:
+    def native_value(self) -> float | str | None:
         if self.trait is None:
             return None
+        if self.capability.kind == "light_readiness":
+            return light_control_status(
+                self.device, self.trait, self.coordinator.options
+            )
         value = finite_number(self.trait.value)
         if value is None:
             return None

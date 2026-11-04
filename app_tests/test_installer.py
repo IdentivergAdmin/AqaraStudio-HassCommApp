@@ -67,7 +67,7 @@ def test_supervisor_metadata_and_minimal_image():
     addon = yaml.safe_load((ROOT / "aqara_studio_installer/config.yaml").read_text())
     assert repo["name"]
     assert addon["slug"] == "aqara_studio_installer"
-    assert addon["version"] == "0.1.2"
+    assert addon["version"] == "0.1.3"
     assert addon["arch"] == ["amd64", "aarch64"]
     assert addon["startup"] == "once"
     assert addon["boot"] == "manual_only"

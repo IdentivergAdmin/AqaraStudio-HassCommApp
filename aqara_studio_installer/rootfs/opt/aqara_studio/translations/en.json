@@ -73,7 +73,8 @@
           "inventory_interval": "Inventory discovery interval (seconds)",
           "enable_websocket": "Enable WebSocket push",
           "enable_button_events": "Enable experimental live button events",
-          "enable_controls": "Enable verified light and switch controls",
+          "enable_controls": "Enable writable switches and outlets (advanced)",
+          "enable_light_controls": "Enable native light controls",
           "excluded_devices": "Exclude devices"
         },
         "data_description": {
@@ -84,7 +85,8 @@
           "inventory_interval": "Find newly added devices without restarting Home Assistant.",
           "enable_websocket": "Use the documented local push channel, with REST reconciliation and polling fallback.",
           "enable_button_events": "Only newly received live ButtonEvent updates produce events. Cached values never generate presses.",
-          "enable_controls": "Off by default. Enable to discover native controllable lights/switches. Requires explicit writable traits; color/brightness only where supported.",
+          "enable_controls": "Off by default. Only for switch/outlet endpoints; never enables lock, valve, or garage control.",
+          "enable_light_controls": "On by default for devices positively identified as lights with a writable OnOff trait. Disable to keep only read-only state and the light control status diagnostic.",
           "excluded_devices": "Excluded devices are not polled. Existing Home Assistant registry entries are retained."
         }
       }

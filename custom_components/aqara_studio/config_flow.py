@@ -26,6 +26,7 @@ from .const import (
     CONF_CONTACT_POLARITY,
     CONF_ENABLE_BUTTON_EVENTS,
     CONF_ENABLE_CONTROLS,
+    CONF_ENABLE_LIGHT_CONTROLS,
     CONF_ENABLE_WEBSOCKET,
     CONF_EXCLUDED_DEVICES,
     CONF_GATEWAY_ID,
@@ -276,6 +277,7 @@ class AqaraStudioOptionsFlow(OptionsFlow):
             CONF_ENABLE_WEBSOCKET,
             CONF_ENABLE_BUTTON_EVENTS,
             CONF_ENABLE_CONTROLS,
+            CONF_ENABLE_LIGHT_CONTROLS,
         ):
             fields[vol.Required(key, default=options[key])] = bool
         fields[
